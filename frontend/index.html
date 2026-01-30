@@ -398,6 +398,63 @@
                 <p class="reasoning-text" id="reasoningText"></p>
             </div>
 
+            <!-- Sentiment Breakdown Chart -->
+            <div style="display: flex; gap: 20px; margin-top: 25px;">
+                <div style="flex: 1; background: rgba(255,255,255,0.03); border-radius: 12px; padding: 20px;">
+                    <div
+                        style="font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">
+                        📊 Source Breakdown</div>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="font-size: 0.85rem;">📰 News</span>
+                                <span style="font-size: 0.85rem; color: var(--green);" id="newsPercent">78%</span>
+                            </div>
+                            <div
+                                style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                                <div id="newsBar"
+                                    style="width: 78%; height: 100%; background: var(--green); border-radius: 4px;">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="font-size: 0.85rem;">🐦 Twitter</span>
+                                <span style="font-size: 0.85rem; color: var(--blue);" id="twitterPercent">85%</span>
+                            </div>
+                            <div
+                                style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                                <div id="twitterBar"
+                                    style="width: 85%; height: 100%; background: var(--blue); border-radius: 4px;">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="font-size: 0.85rem;">💬 Reddit</span>
+                                <span style="font-size: 0.85rem; color: #FF6B35;" id="redditPercent">92%</span>
+                            </div>
+                            <div
+                                style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                                <div id="redditBar"
+                                    style="width: 92%; height: 100%; background: #FF6B35; border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="flex: 1; background: rgba(255,255,255,0.03); border-radius: 12px; padding: 20px;">
+                    <div
+                        style="font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">
+                        ⚡ Key Insights</div>
+                    <ul style="list-style: none; font-size: 0.9rem; line-height: 1.8; color: rgba(255,255,255,0.8);"
+                        id="keyInsights">
+                        <li>✅ Strong social media momentum</li>
+                        <li>✅ Positive analyst coverage</li>
+                        <li>✅ Volume surge detected</li>
+                    </ul>
+                </div>
+            </div>
+
             <div class="stats-row">
                 <div class="stat-item">
                     <div class="stat-value" id="sourcesCount">156</div>
