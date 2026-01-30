@@ -582,6 +582,22 @@
                 fill.style.background = data.signal === 'BUY' ? 'var(--green)' :
                     data.signal === 'SELL' ? 'var(--red)' : 'var(--yellow)';
 
+                // Update source breakdown if available
+                if (data.source_breakdown) {
+                    document.getElementById('newsPercent').textContent = `${data.source_breakdown.news}%`;
+                    document.getElementById('newsBar').style.width = `${data.source_breakdown.news}%`;
+                    document.getElementById('twitterPercent').textContent = `${data.source_breakdown.twitter}%`;
+                    document.getElementById('twitterBar').style.width = `${data.source_breakdown.twitter}%`;
+                    document.getElementById('redditPercent').textContent = `${data.source_breakdown.reddit}%`;
+                    document.getElementById('redditBar').style.width = `${data.source_breakdown.reddit}%`;
+                }
+
+                // Update insights if available
+                if (data.insights) {
+                    const insightsList = document.getElementById('keyInsights');
+                    insightsList.innerHTML = data.insights.map(i => `<li>${i}</li>`).join('');
+                }
+
                 loading.classList.remove('show');
                 results.classList.add('show');
 

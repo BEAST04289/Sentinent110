@@ -43,6 +43,11 @@ app.add_middleware(
 class AnalysisRequest(BaseModel):
     ticker: str
 
+class SourceBreakdown(BaseModel):
+    news: int
+    twitter: int
+    reddit: int
+
 class AnalysisResponse(BaseModel):
     ticker: str
     signal: str  # BUY, SELL, HOLD
@@ -52,6 +57,8 @@ class AnalysisResponse(BaseModel):
     sources_analyzed: int
     timestamp: str
     price: Optional[float] = None
+    source_breakdown: Optional[SourceBreakdown] = None
+    insights: Optional[list] = None
 
 
 # ============= MOCK DATA (for demo) =============
@@ -148,6 +155,45 @@ async def analyze_ticker(request: AnalysisRequest):
             "price": random.uniform(10, 500)
         }
     
+    # Generate source breakdown based on signal
+    import random
+    if data["signal"] == "BUY":
+        source_breakdown = SourceBreakdown(
+            news=random.randint(70, 90),
+            twitter=random.randint(75, 95),
+            reddit=random.randint(80, 98)
+        )
+        insights = [
+            "✅ Strong bullish momentum detected",
+            "✅ Positive analyst coverage increasing",
+            "✅ Social media sentiment spiking",
+            "📈 Volume surge in last 24 hours"
+        ]
+    elif data["signal"] == "SELL":
+        source_breakdown = SourceBreakdown(
+            news=random.randint(20, 40),
+            twitter=random.randint(15, 35),
+            reddit=random.randint(25, 45)
+        )
+        insights = [
+            "⚠️ Bearish signals across sources",
+            "📉 Declining institutional interest",
+            "❌ Negative analyst revisions",
+            "🔻 Momentum indicators weakening"
+        ]
+    else:
+        source_breakdown = SourceBreakdown(
+            news=random.randint(45, 65),
+            twitter=random.randint(40, 60),
+            reddit=random.randint(50, 70)
+        )
+        insights = [
+            "⏸️ Mixed sentiment across sources",
+            "📊 Wait for clearer signals",
+            "🔄 Market consolidating",
+            "👀 Monitor for breakout"
+        ]
+    
     return AnalysisResponse(
         ticker=ticker,
         signal=data["signal"],
@@ -156,7 +202,9 @@ async def analyze_ticker(request: AnalysisRequest):
         sentiment_score=data["sentiment_score"],
         sources_analyzed=data["sources_analyzed"],
         timestamp=datetime.now().isoformat(),
-        price=data.get("price")
+        price=data.get("price"),
+        source_breakdown=source_breakdown,
+        insights=insights
     )
 
 
