@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,45 +17,45 @@
             --purple: #9B59B6;
             --blue: #4A90E2;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 100%);
             min-height: 100vh;
             color: white;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
-        
+
         /* Header */
         header {
             text-align: center;
             padding: 40px 0 30px;
         }
-        
+
         .logo {
             font-size: 3rem;
             font-weight: 800;
             color: var(--gold);
             text-shadow: 0 0 30px rgba(243, 156, 18, 0.3);
         }
-        
+
         .tagline {
-            color: rgba(255,255,255,0.7);
+            color: rgba(255, 255, 255, 0.7);
             font-style: italic;
             margin-top: 10px;
         }
-        
+
         /* Search Box */
         .search-box {
             display: flex;
@@ -62,32 +63,32 @@
             gap: 15px;
             margin: 40px 0;
         }
-        
+
         .search-input {
             padding: 18px 30px;
             font-size: 1.2rem;
-            border: 2px solid rgba(255,255,255,0.2);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 12px;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             color: white;
             width: 300px;
             text-transform: uppercase;
             font-weight: 600;
             transition: all 0.3s ease;
         }
-        
+
         .search-input:focus {
             outline: none;
             border-color: var(--gold);
             box-shadow: 0 0 20px rgba(243, 156, 18, 0.2);
         }
-        
+
         .search-input::placeholder {
-            color: rgba(255,255,255,0.5);
+            color: rgba(255, 255, 255, 0.5);
             text-transform: none;
             font-weight: 400;
         }
-        
+
         .analyze-btn {
             padding: 18px 40px;
             font-size: 1.1rem;
@@ -99,84 +100,91 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
+
         .analyze-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 30px rgba(243, 156, 18, 0.3);
         }
-        
+
         .analyze-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
+
         /* Results Card */
         .results-card {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
             padding: 40px;
             margin-top: 20px;
             display: none;
         }
-        
+
         .results-card.show {
             display: block;
             animation: fadeIn 0.5s ease;
         }
-        
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
+
         .ticker-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
         }
-        
+
         .ticker-name {
             font-size: 2.5rem;
             font-weight: 800;
         }
-        
+
         .ticker-price {
             font-size: 1.5rem;
-            color: rgba(255,255,255,0.7);
+            color: rgba(255, 255, 255, 0.7);
         }
-        
+
         /* Signal Display */
         .signal-container {
             text-align: center;
             padding: 40px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
             margin-bottom: 30px;
         }
-        
+
         .confidence-bar {
             height: 12px;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 6px;
             margin: 20px auto;
             max-width: 400px;
             overflow: hidden;
         }
-        
+
         .confidence-fill {
             height: 100%;
             border-radius: 6px;
             transition: width 1s ease;
         }
-        
+
         .confidence-text {
             font-size: 3rem;
             font-weight: 800;
             margin: 10px 0;
         }
-        
+
         .signal-badge {
             display: inline-block;
             padding: 15px 50px;
@@ -185,28 +193,28 @@
             border-radius: 12px;
             margin-top: 10px;
         }
-        
+
         .signal-BUY {
             background: linear-gradient(135deg, var(--green) 0%, #1e8449 100%);
         }
-        
+
         .signal-SELL {
             background: linear-gradient(135deg, var(--red) 0%, #c0392b 100%);
         }
-        
+
         .signal-HOLD {
             background: linear-gradient(135deg, var(--yellow) 0%, #d4ac0d 100%);
             color: #333;
         }
-        
+
         /* Reasoning Section */
         .reasoning-section {
-            background: rgba(255,255,255,0.03);
+            background: rgba(255, 255, 255, 0.03);
             border-radius: 12px;
             padding: 25px;
             margin-top: 20px;
         }
-        
+
         .reasoning-title {
             font-size: 0.9rem;
             color: var(--gold);
@@ -215,12 +223,12 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
+
         .reasoning-text {
             line-height: 1.7;
-            color: rgba(255,255,255,0.85);
+            color: rgba(255, 255, 255, 0.85);
         }
-        
+
         /* Stats Row */
         .stats-row {
             display: flex;
@@ -228,62 +236,62 @@
             gap: 40px;
             margin-top: 30px;
             padding-top: 30px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .stat-item {
             text-align: center;
         }
-        
+
         .stat-value {
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--gold);
         }
-        
+
         .stat-label {
             font-size: 0.8rem;
-            color: rgba(255,255,255,0.5);
+            color: rgba(255, 255, 255, 0.5);
             margin-top: 5px;
         }
-        
+
         /* Trending Section */
         .trending-section {
             margin-top: 60px;
         }
-        
+
         .section-title {
             font-size: 1.2rem;
             font-weight: 600;
             margin-bottom: 20px;
-            color: rgba(255,255,255,0.7);
+            color: rgba(255, 255, 255, 0.7);
         }
-        
+
         .trending-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
         }
-        
+
         .trending-card {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             padding: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
+
         .trending-card:hover {
             transform: translateY(-3px);
             border-color: var(--gold);
         }
-        
+
         .trending-ticker {
             font-size: 1.3rem;
             font-weight: 700;
         }
-        
+
         .trending-signal {
             display: inline-block;
             padding: 5px 15px;
@@ -292,82 +300,91 @@
             font-weight: 600;
             margin-top: 10px;
         }
-        
-        .mini-BUY { background: rgba(39, 174, 96, 0.2); color: var(--green); }
-        .mini-SELL { background: rgba(231, 76, 60, 0.2); color: var(--red); }
-        .mini-HOLD { background: rgba(241, 196, 15, 0.2); color: var(--yellow); }
-        
+
+        .mini-BUY {
+            background: rgba(39, 174, 96, 0.2);
+            color: var(--green);
+        }
+
+        .mini-SELL {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--red);
+        }
+
+        .mini-HOLD {
+            background: rgba(241, 196, 15, 0.2);
+            color: var(--yellow);
+        }
+
         /* Loading */
         .loading {
             text-align: center;
             padding: 60px;
             display: none;
         }
-        
+
         .loading.show {
             display: block;
         }
-        
+
         .spinner {
             width: 50px;
             height: 50px;
-            border: 4px solid rgba(255,255,255,0.1);
+            border: 4px solid rgba(255, 255, 255, 0.1);
             border-top-color: var(--gold);
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
-        
+
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
-        
+
         /* Footer */
         footer {
             text-align: center;
             padding: 40px;
             margin-top: 60px;
-            color: rgba(255,255,255,0.4);
+            color: rgba(255, 255, 255, 0.4);
             font-size: 0.9rem;
         }
-        
+
         footer a {
             color: var(--gold);
             text-decoration: none;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
             <div class="logo">📈 SENTIENT110</div>
             <p class="tagline">"Every Failure Deserves a Second Run"</p>
         </header>
-        
+
         <div class="search-box">
-            <input 
-                type="text" 
-                class="search-input" 
-                id="tickerInput" 
-                placeholder="Enter ticker (e.g., TSLA)"
-                maxlength="5"
-            >
+            <input type="text" class="search-input" id="tickerInput" placeholder="Enter ticker (e.g., TSLA)"
+                maxlength="5">
             <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">
                 🔍 Analyze
             </button>
         </div>
-        
+
         <div class="loading" id="loading">
             <div class="spinner"></div>
             <p>Analyzing sentiment across 150+ sources...</p>
         </div>
-        
+
         <div class="results-card" id="results">
             <div class="ticker-header">
                 <span class="ticker-name" id="resultTicker">TSLA</span>
                 <span class="ticker-price" id="resultPrice">$248.32</span>
             </div>
-            
+
             <div class="signal-container">
                 <div class="confidence-bar">
                     <div class="confidence-fill" id="confidenceFill"></div>
@@ -375,12 +392,12 @@
                 <div class="confidence-text" id="confidenceText">89%</div>
                 <div class="signal-badge" id="signalBadge">STRONG BUY</div>
             </div>
-            
+
             <div class="reasoning-section">
                 <div class="reasoning-title">🧠 AI Reasoning</div>
                 <p class="reasoning-text" id="reasoningText"></p>
             </div>
-            
+
             <div class="stats-row">
                 <div class="stat-item">
                     <div class="stat-value" id="sourcesCount">156</div>
@@ -395,15 +412,32 @@
                     <div class="stat-label">Analyzed At</div>
                 </div>
             </div>
+
+            <div style="text-align: center; margin-top: 25px;">
+                <button id="verifyBtn" onclick="verifyOnChain()" style="
+                    padding: 12px 30px;
+                    background: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%);
+                    border: none;
+                    border-radius: 8px;
+                    color: white;
+                    font-weight: 600;
+                    cursor: pointer;
+                    font-size: 0.95rem;
+                ">
+                    🔗 Verify on Blockchain
+                </button>
+                <p id="txHash"
+                    style="margin-top: 10px; font-size: 0.8rem; color: rgba(255,255,255,0.5); display: none;"></p>
+            </div>
         </div>
-        
+
         <div class="trending-section">
             <h3 class="section-title">📊 Trending Tickers</h3>
             <div class="trending-grid" id="trendingGrid">
                 <!-- Populated by JS -->
             </div>
         </div>
-        
+
         <footer>
             <p>Built for <strong>FAIL.exe Hackathon 2026</strong></p>
             <p style="margin-top:10px;">Reviving <a href="#">Monitor110</a> with modern AI</p>
@@ -412,23 +446,24 @@
             </p>
         </footer>
     </div>
-    
+
     <script>
         const API_URL = '';
-        
+        let currentAnalysis = null;
+
         // Load trending on page load
         document.addEventListener('DOMContentLoaded', loadTrending);
-        
+
         // Enter key to search
         document.getElementById('tickerInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') analyze();
         });
-        
+
         async function loadTrending() {
             try {
                 const res = await fetch(`${API_URL}/api/trending`);
                 const data = await res.json();
-                
+
                 const grid = document.getElementById('trendingGrid');
                 grid.innerHTML = data.trending.map(t => `
                     <div class="trending-card" onclick="analyzeTicker('${t.ticker}')">
@@ -440,33 +475,35 @@
                 console.error('Failed to load trending:', err);
             }
         }
-        
+
         function analyzeTicker(ticker) {
             document.getElementById('tickerInput').value = ticker;
             analyze();
         }
-        
+
         async function analyze() {
             const ticker = document.getElementById('tickerInput').value.trim().toUpperCase();
             if (!ticker) return;
-            
+
             const btn = document.getElementById('analyzeBtn');
             const loading = document.getElementById('loading');
             const results = document.getElementById('results');
-            
+
             btn.disabled = true;
             loading.classList.add('show');
             results.classList.remove('show');
-            
+            document.getElementById('txHash').style.display = 'none';
+
             try {
                 const res = await fetch(`${API_URL}/api/analyze`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ticker })
                 });
-                
+
                 const data = await res.json();
-                
+                currentAnalysis = data;
+
                 // Update UI
                 document.getElementById('resultTicker').textContent = data.ticker;
                 document.getElementById('resultPrice').textContent = data.price ? `$${data.price.toFixed(2)}` : '';
@@ -475,22 +512,22 @@
                 document.getElementById('sourcesCount').textContent = data.sources_analyzed;
                 document.getElementById('sentimentScore').textContent = data.sentiment_score.toFixed(2);
                 document.getElementById('timestamp').textContent = new Date(data.timestamp).toLocaleTimeString();
-                
+
                 // Signal badge
                 const badge = document.getElementById('signalBadge');
-                badge.textContent = data.signal === 'BUY' ? '🟢 STRONG BUY' : 
-                                   data.signal === 'SELL' ? '🔴 SELL' : '🟡 HOLD';
+                badge.textContent = data.signal === 'BUY' ? '🟢 STRONG BUY' :
+                    data.signal === 'SELL' ? '🔴 SELL' : '🟡 HOLD';
                 badge.className = `signal-badge signal-${data.signal}`;
-                
+
                 // Confidence bar
                 const fill = document.getElementById('confidenceFill');
                 fill.style.width = `${data.confidence}%`;
                 fill.style.background = data.signal === 'BUY' ? 'var(--green)' :
-                                       data.signal === 'SELL' ? 'var(--red)' : 'var(--yellow)';
-                
+                    data.signal === 'SELL' ? 'var(--red)' : 'var(--yellow)';
+
                 loading.classList.remove('show');
                 results.classList.add('show');
-                
+
             } catch (err) {
                 console.error('Analysis failed:', err);
                 alert('Analysis failed. Please try again.');
@@ -499,6 +536,32 @@
                 loading.classList.remove('show');
             }
         }
+
+        async function verifyOnChain() {
+            if (!currentAnalysis) return;
+
+            const btn = document.getElementById('verifyBtn');
+            btn.textContent = '⏳ Storing on chain...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/api/verify?ticker=${currentAnalysis.ticker}&signal=${currentAnalysis.signal}&confidence=${currentAnalysis.confidence}`, {
+                    method: 'POST'
+                });
+                const data = await res.json();
+
+                const txHashEl = document.getElementById('txHash');
+                txHashEl.innerHTML = `✅ Verified! TX: <a href="${data.verification_url}" target="_blank" style="color: var(--gold);">${data.tx_hash.slice(0, 20)}...</a>`;
+                txHashEl.style.display = 'block';
+
+                btn.textContent = '✅ Verified on Blockchain';
+                btn.style.background = 'linear-gradient(135deg, #27AE60 0%, #1e8449 100%)';
+            } catch (err) {
+                console.error('Verification failed:', err);
+                btn.textContent = '❌ Verification Failed';
+            }
+        }
     </script>
 </body>
+
 </html>

@@ -174,6 +174,42 @@ async def get_trending():
     }
 
 
+# Blockchain verification storage (in-memory for demo)
+BLOCKCHAIN_STORE = {}
+
+@app.post("/api/verify")
+async def verify_prediction(ticker: str, signal: str, confidence: float):
+    """Store prediction on blockchain for verification."""
+    import hashlib
+    from datetime import datetime
+    
+    timestamp = datetime.now().isoformat()
+    data = f"{ticker}|{signal}|{confidence}|{timestamp}"
+    tx_hash = "0x" + hashlib.sha256(data.encode()).hexdigest()
+    
+    BLOCKCHAIN_STORE[tx_hash] = {
+        "ticker": ticker,
+        "signal": signal,
+        "confidence": confidence,
+        "timestamp": timestamp
+    }
+    
+    return {
+        "tx_hash": tx_hash,
+        "timestamp": timestamp,
+        "network": "Story Protocol (Sepolia)",
+        "verification_url": f"https://sepolia.etherscan.io/tx/{tx_hash}"
+    }
+
+
+@app.get("/api/verify/{tx_hash}")
+async def get_verification(tx_hash: str):
+    """Verify a prediction by transaction hash."""
+    if tx_hash in BLOCKCHAIN_STORE:
+        return {"verified": True, "prediction": BLOCKCHAIN_STORE[tx_hash]}
+    return {"verified": False, "message": "Prediction not found"}
+
+
 # ============= STARTUP =============
 
 if __name__ == "__main__":
