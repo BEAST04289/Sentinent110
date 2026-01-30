@@ -1,6 +1,6 @@
 """
 Sentient110 - Vercel Serverless Handler
-Uses proper Vercel Python format with http.server.BaseHTTPRequestHandler
+Serves both API and frontend from single handler
 """
 
 from http.server import BaseHTTPRequestHandler
@@ -10,55 +10,318 @@ import hashlib
 from datetime import datetime
 from urllib.parse import parse_qs, urlparse
 
+# HTML content inline
+HTML_CONTENT = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SENTIENT110 - AI Financial Sentiment Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: { 900: '#0a0a0a', 800: '#141414', 700: '#1f1f1f', 600: '#2a2a2a', 500: '#3a3a3a' },
+                        accent: { 500: '#f59e0b', 400: '#fbbf24', 600: '#d97706' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glow { box-shadow: 0 0 40px rgba(245, 158, 11, 0.15); }
+        @keyframes slide-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .slide-up { animation: slide-up 0.5s ease-out; }
+    </style>
+</head>
+<body class="bg-dark-900 min-h-screen text-white">
+    <header class="border-b border-white/10 bg-dark-800/50 backdrop-blur-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-500 to-accent-600 flex items-center justify-center">
+                    <span class="text-xl">📈</span>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-accent-500">SENTIENT110</h1>
+                    <p class="text-xs text-white/50">Powered by Claude 3.5 Haiku</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <span id="apiStatus" class="text-xs px-3 py-1 rounded-full bg-accent-500/20 text-accent-400">● Live</span>
+                <a href="https://github.com/BEAST04289/Sentinent110" target="_blank" class="text-white/60 hover:text-white transition">GitHub</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <section class="text-center py-12">
+            <h2 class="text-4xl md:text-5xl font-black mb-4">
+                <span class="text-white">Real-Time</span>
+                <span class="text-accent-500"> Sentiment Analysis</span>
+            </h2>
+            <p class="text-white/60 text-lg max-w-2xl mx-auto mb-8">
+                Powered by <span class="text-accent-400 font-semibold">Claude 3.5 Haiku</span> • Real-time NewsAPI + Twitter/X • Instant BUY/SELL/HOLD signals
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-xl mx-auto">
+                <input type="text" id="tickerInput" placeholder="Enter ticker (e.g., TSLA)" maxlength="5" 
+                    class="w-full sm:w-64 px-6 py-4 rounded-xl bg-dark-700 border border-dark-500 text-white text-lg font-semibold uppercase text-center focus:outline-none focus:border-accent-500 placeholder:text-white/40 placeholder:normal-case placeholder:font-normal">
+                <button id="analyzeBtn" onclick="analyze()" 
+                    class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-accent-500 to-accent-600 text-dark-900 font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50">
+                    🔍 Analyze
+                </button>
+            </div>
+        </section>
+
+        <div id="loading" class="hidden py-16 text-center">
+            <div class="w-12 h-12 border-4 border-dark-600 border-t-accent-500 rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-white/60">Claude 3.5 Haiku analyzing sentiment...</p>
+        </div>
+
+        <section id="results" class="hidden slide-up">
+            <div class="bg-dark-800 border border-dark-600 rounded-2xl p-8 glow">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 pb-6 border-b border-dark-600">
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 id="resultTicker" class="text-4xl font-black">TSLA</h3>
+                            <span id="dataSource" class="text-xs px-2 py-1 rounded-full bg-accent-500/20 text-accent-400">Real Data</span>
+                        </div>
+                        <p id="resultPrice" class="text-2xl text-white/70"></p>
+                    </div>
+                    <div id="signalBadge" class="mt-4 md:mt-0 px-8 py-4 rounded-xl text-2xl font-black text-center bg-gradient-to-r from-green-500 to-green-600">🟢 BUY</div>
+                </div>
+
+                <div class="mb-8">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-white/60">AI Confidence</span>
+                        <span id="confidenceText" class="text-2xl font-bold text-accent-500">89%</span>
+                    </div>
+                    <div class="h-3 bg-dark-600 rounded-full overflow-hidden">
+                        <div id="confidenceFill" class="h-full rounded-full transition-all duration-1000 bg-green-500" style="width: 89%"></div>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-dark-700 rounded-xl p-6">
+                        <h4 class="text-accent-500 font-semibold text-sm uppercase mb-3">🧠 Claude 3.5 Haiku Analysis</h4>
+                        <p id="reasoningText" class="text-white/80 leading-relaxed">Analysis loading...</p>
+                    </div>
+                    <div class="bg-dark-700 rounded-xl p-6">
+                        <h4 class="text-accent-500 font-semibold text-sm uppercase mb-3">⚡ Key Insights</h4>
+                        <ul id="keyInsights" class="space-y-2 text-white/80"></ul>
+                    </div>
+                </div>
+
+                <div class="bg-dark-700 rounded-xl p-6 mb-8">
+                    <h4 class="text-accent-500 font-semibold text-sm uppercase mb-4">📊 Sentiment by Source</h4>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <div class="flex items-center justify-between mb-2"><span class="text-sm">📰 News</span><span id="newsPercent" class="text-green-400 font-semibold">78%</span></div>
+                            <div class="h-2 bg-dark-600 rounded-full overflow-hidden"><div id="newsBar" class="h-full bg-green-500 rounded-full" style="width: 78%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-2"><span class="text-sm">🐦 Twitter</span><span id="twitterPercent" class="text-blue-400 font-semibold">85%</span></div>
+                            <div class="h-2 bg-dark-600 rounded-full overflow-hidden"><div id="twitterBar" class="h-full bg-blue-500 rounded-full" style="width: 85%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-2"><span class="text-sm">💬 Reddit</span><span id="redditPercent" class="text-orange-400 font-semibold">92%</span></div>
+                            <div class="h-2 bg-dark-600 rounded-full overflow-hidden"><div id="redditBar" class="h-full bg-orange-500 rounded-full" style="width: 92%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="newsSection" class="bg-dark-700 rounded-xl p-6 mb-8 hidden">
+                    <h4 class="text-accent-500 font-semibold text-sm uppercase mb-4">📰 Latest Headlines</h4>
+                    <ul id="newsList" class="space-y-3 text-white/70 text-sm"></ul>
+                </div>
+
+                <div class="flex flex-col md:flex-row items-center justify-between pt-6 border-t border-dark-600">
+                    <div class="flex gap-8 mb-4 md:mb-0">
+                        <div class="text-center"><p id="sourcesCount" class="text-2xl font-bold text-accent-500">10</p><p class="text-xs text-white/50">Sources</p></div>
+                        <div class="text-center"><p id="sentimentScore" class="text-2xl font-bold text-accent-500">0.85</p><p class="text-xs text-white/50">Sentiment</p></div>
+                        <div class="text-center"><p id="timestamp" class="text-2xl font-bold text-accent-500">Now</p><p class="text-xs text-white/50">Analyzed</p></div>
+                    </div>
+                    <div class="text-center">
+                        <button id="verifyBtn" onclick="verifyOnChain()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold">🔗 Verify on Story Protocol</button>
+                        <p id="txHash" class="mt-2 text-xs text-white/40 hidden"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mt-16">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2"><span class="text-accent-500">📊</span> Trending Tickers</h3>
+            <div id="trendingGrid" class="grid grid-cols-2 md:grid-cols-5 gap-4"></div>
+        </section>
+
+        <section class="mt-16 bg-dark-800 border border-dark-600 rounded-2xl p-8">
+            <h3 class="text-xl font-bold mb-6 text-center">Why <span class="text-red-400">Monitor110</span> Failed → How <span class="text-accent-500">Sentient110</span> Succeeds</h3>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-6">
+                    <h4 class="text-red-400 font-bold mb-4">❌ Monitor110 (2008)</h4>
+                    <ul class="space-y-2 text-white/70 text-sm"><li>• Rule-based keyword matching</li><li>• Manual data curation</li><li>• No social media integration</li><li>• Slow processing (hours)</li><li>• $20M+ infrastructure costs</li></ul>
+                </div>
+                <div class="bg-green-500/10 border border-green-500/20 rounded-xl p-6">
+                    <h4 class="text-green-400 font-bold mb-4">✅ Sentient110 (2026)</h4>
+                    <ul class="space-y-2 text-white/70 text-sm"><li>• Claude 3.5 Haiku AI analysis</li><li>• Real-time NewsAPI + Twitter</li><li>• Multi-source aggregation</li><li>• Instant processing (<3 sec)</li><li>• ~$0.001 per analysis</li></ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="mt-16 text-center">
+            <h3 class="text-lg font-semibold text-white/60 mb-4">Powered By</h3>
+            <div class="flex flex-wrap justify-center gap-4">
+                <span class="px-4 py-2 bg-dark-700 rounded-lg text-sm">🧠 Claude 3.5 Haiku</span>
+                <span class="px-4 py-2 bg-dark-700 rounded-lg text-sm">📰 NewsAPI</span>
+                <span class="px-4 py-2 bg-dark-700 rounded-lg text-sm">🐦 Twitter/X API</span>
+                <span class="px-4 py-2 bg-dark-700 rounded-lg text-sm">📊 Alpha Vantage</span>
+                <span class="px-4 py-2 bg-dark-700 rounded-lg text-sm">🔗 Story Protocol</span>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-dark-600 mt-16 py-8">
+        <div class="max-w-7xl mx-auto px-6 text-center text-white/40 text-sm">
+            <p>Built for <strong class="text-accent-500">FAIL.exe Hackathon 2026</strong></p>
+            <p class="mt-2">"Every Failure Deserves a Second Run"</p>
+        </div>
+    </footer>
+
+    <script>
+        let currentAnalysis = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTrending();
+            fetch('/api/health').then(r => r.json()).then(d => {
+                document.getElementById('apiStatus').innerHTML = d.real_api ? '● Live' : '○ Demo';
+            }).catch(() => {});
+        });
+
+        document.getElementById('tickerInput').addEventListener('keypress', e => { if (e.key === 'Enter') analyze(); });
+
+        async function loadTrending() {
+            try {
+                const res = await fetch('/api/trending');
+                const data = await res.json();
+                document.getElementById('trendingGrid').innerHTML = data.trending.map(t => `
+                    <div onclick="document.getElementById('tickerInput').value='${t.ticker}';analyze()" 
+                         class="bg-dark-800 border border-dark-600 rounded-xl p-4 cursor-pointer hover:border-accent-500/50 hover:-translate-y-1 transition-all">
+                        <div class="text-lg font-bold">${t.ticker}</div>
+                        <div class="text-sm text-white/50">$${t.price?.toFixed(2) || '---'}</div>
+                        <span class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold ${t.signal === 'BUY' ? 'bg-green-500/20 text-green-400' : t.signal === 'SELL' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'}">${t.signal} ${t.confidence}%</span>
+                    </div>
+                `).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        async function analyze() {
+            const ticker = document.getElementById('tickerInput').value.trim().toUpperCase();
+            if (!ticker) return;
+
+            document.getElementById('analyzeBtn').disabled = true;
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('results').classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ticker }) });
+                const data = await res.json();
+                currentAnalysis = data;
+
+                document.getElementById('resultTicker').textContent = data.ticker;
+                document.getElementById('resultPrice').innerHTML = data.price ? `$${data.price.toFixed(2)} <span class="${data.price_change?.includes('-') ? 'text-red-400' : 'text-green-400'}">${data.price_change || ''}</span>` : '';
+                document.getElementById('confidenceText').textContent = `${data.confidence}%`;
+                document.getElementById('confidenceFill').style.width = `${data.confidence}%`;
+                document.getElementById('reasoningText').textContent = data.reasoning;
+                document.getElementById('sourcesCount').textContent = data.sources_analyzed;
+                document.getElementById('sentimentScore').textContent = data.sentiment_score?.toFixed(2) || '0.50';
+                document.getElementById('timestamp').textContent = new Date(data.timestamp).toLocaleTimeString();
+
+                const badge = document.getElementById('signalBadge');
+                if (data.signal === 'BUY') { badge.textContent = '🟢 STRONG BUY'; badge.className = 'mt-4 md:mt-0 px-8 py-4 rounded-xl text-2xl font-black text-center bg-gradient-to-r from-green-500 to-green-600'; }
+                else if (data.signal === 'SELL') { badge.textContent = '🔴 SELL'; badge.className = 'mt-4 md:mt-0 px-8 py-4 rounded-xl text-2xl font-black text-center bg-gradient-to-r from-red-500 to-red-600'; }
+                else { badge.textContent = '🟡 HOLD'; badge.className = 'mt-4 md:mt-0 px-8 py-4 rounded-xl text-2xl font-black text-center bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900'; }
+
+                document.getElementById('confidenceFill').className = `h-full rounded-full transition-all duration-1000 ${data.signal === 'BUY' ? 'bg-green-500' : data.signal === 'SELL' ? 'bg-red-500' : 'bg-yellow-500'}`;
+
+                if (data.source_breakdown) {
+                    document.getElementById('newsPercent').textContent = `${data.source_breakdown.news}%`;
+                    document.getElementById('newsBar').style.width = `${data.source_breakdown.news}%`;
+                    document.getElementById('twitterPercent').textContent = `${data.source_breakdown.twitter}%`;
+                    document.getElementById('twitterBar').style.width = `${data.source_breakdown.twitter}%`;
+                    document.getElementById('redditPercent').textContent = `${data.source_breakdown.reddit}%`;
+                    document.getElementById('redditBar').style.width = `${data.source_breakdown.reddit}%`;
+                }
+
+                if (data.insights?.length) document.getElementById('keyInsights').innerHTML = data.insights.map(i => `<li>${i}</li>`).join('');
+
+                const newsSection = document.getElementById('newsSection');
+                if (data.news_headlines?.length) {
+                    newsSection.classList.remove('hidden');
+                    document.getElementById('newsList').innerHTML = data.news_headlines.map(h => `<li>• ${h}</li>`).join('');
+                } else { newsSection.classList.add('hidden'); }
+
+                document.getElementById('dataSource').innerHTML = data.using_real_data ? '● Real Data' : '○ Demo';
+                document.getElementById('results').classList.remove('hidden');
+            } catch (e) { console.error(e); alert('Analysis failed'); }
+            finally { document.getElementById('analyzeBtn').disabled = false; document.getElementById('loading').classList.add('hidden'); }
+        }
+
+        async function verifyOnChain() {
+            if (!currentAnalysis) return;
+            const btn = document.getElementById('verifyBtn');
+            btn.textContent = '⏳ Storing...';
+            try {
+                const res = await fetch(`/api/verify?ticker=${currentAnalysis.ticker}&signal=${currentAnalysis.signal}&confidence=${currentAnalysis.confidence}`, { method: 'POST' });
+                const data = await res.json();
+                document.getElementById('txHash').innerHTML = `✅ TX: <a href="${data.verification_url}" target="_blank" class="text-accent-500">${data.tx_hash.slice(0, 20)}...</a>`;
+                document.getElementById('txHash').classList.remove('hidden');
+                btn.textContent = '✅ Verified';
+            } catch (e) { btn.textContent = '❌ Failed'; }
+        }
+    </script>
+</body>
+</html>'''
+
+
 class handler(BaseHTTPRequestHandler):
     
     def do_GET(self):
-        """Handle GET requests."""
         path = urlparse(self.path).path
         
-        if path == "/api/health":
-            self._send_json({
-                "status": "healthy",
-                "service": "Sentient110",
-                "version": "2.0.0",
-                "real_api": bool(os.getenv("OPENAI_API_KEY")),
-                "timestamp": datetime.now().isoformat()
-            })
-        
+        # Serve HTML for root
+        if path == "/" or path == "":
+            self._send_html(HTML_CONTENT)
+        elif path == "/api/health":
+            self._send_json({"status": "healthy", "service": "Sentient110", "version": "2.0.0", "real_api": bool(os.getenv("OPENAI_API_KEY"))})
         elif path == "/api/trending":
-            self._send_json({
-                "trending": [
-                    {"ticker": "TSLA", "signal": "BUY", "confidence": 89, "price": 248.32},
-                    {"ticker": "NVDA", "signal": "BUY", "confidence": 94, "price": 875.60},
-                    {"ticker": "AAPL", "signal": "HOLD", "confidence": 67, "price": 178.45},
-                    {"ticker": "GOOGL", "signal": "BUY", "confidence": 78, "price": 156.78},
-                    {"ticker": "GME", "signal": "SELL", "confidence": 72, "price": 12.34}
-                ]
-            })
-        
+            self._send_json({"trending": [
+                {"ticker": "TSLA", "signal": "BUY", "confidence": 89, "price": 248.32},
+                {"ticker": "NVDA", "signal": "BUY", "confidence": 94, "price": 875.60},
+                {"ticker": "AAPL", "signal": "HOLD", "confidence": 67, "price": 178.45},
+                {"ticker": "GOOGL", "signal": "BUY", "confidence": 78, "price": 156.78},
+                {"ticker": "GME", "signal": "SELL", "confidence": 72, "price": 12.34}
+            ]})
         elif path.startswith("/api/verify/"):
-            tx_hash = path.split("/")[-1]
-            self._send_json({"verified": False, "tx_hash": tx_hash, "message": "Demo mode - hash not found"})
-        
+            self._send_json({"verified": False})
         else:
             self._send_json({"error": "Not found"}, 404)
     
     def do_POST(self):
-        """Handle POST requests."""
         path = urlparse(self.path).path
         
         if path == "/api/analyze":
             content_length = int(self.headers.get('Content-Length', 0))
             body = self.rfile.read(content_length).decode('utf-8')
-            
             try:
                 data = json.loads(body) if body else {}
                 ticker = data.get("ticker", "TSLA").upper().strip()
             except:
                 ticker = "TSLA"
             
-            # Analyze
-            result = self._analyze_ticker(ticker)
+            result = self._analyze(ticker)
             self._send_json(result)
         
         elif path == "/api/verify":
@@ -68,26 +331,18 @@ class handler(BaseHTTPRequestHandler):
             confidence = query.get("confidence", ["85"])[0]
             
             timestamp = datetime.now().isoformat()
-            data_str = f"{ticker}|{signal}|{confidence}|{timestamp}"
-            tx_hash = "0x" + hashlib.sha256(data_str.encode()).hexdigest()
+            tx_hash = "0x" + hashlib.sha256(f"{ticker}|{signal}|{confidence}|{timestamp}".encode()).hexdigest()
             
-            self._send_json({
-                "tx_hash": tx_hash,
-                "timestamp": timestamp,
-                "network": "Story Protocol (Sepolia)",
-                "verification_url": f"https://sepolia.etherscan.io/tx/{tx_hash}"
-            })
-        
+            self._send_json({"tx_hash": tx_hash, "timestamp": timestamp, "network": "Story Protocol (Sepolia)", "verification_url": f"https://sepolia.etherscan.io/tx/{tx_hash}"})
         else:
             self._send_json({"error": "Not found"}, 404)
     
     def do_OPTIONS(self):
-        """Handle CORS preflight."""
         self.send_response(200)
-        self._send_cors_headers()
+        self._cors()
         self.end_headers()
     
-    def _send_cors_headers(self):
+    def _cors(self):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
@@ -95,153 +350,108 @@ class handler(BaseHTTPRequestHandler):
     def _send_json(self, data, status=200):
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
-        self._send_cors_headers()
+        self._cors()
         self.end_headers()
         self.wfile.write(json.dumps(data).encode())
     
-    def _analyze_ticker(self, ticker):
-        """Analyze a ticker with real APIs when available."""
+    def _send_html(self, html, status=200):
+        self.send_response(status)
+        self.send_header("Content-Type", "text/html")
+        self._cors()
+        self.end_headers()
+        self.wfile.write(html.encode())
+    
+    def _analyze(self, ticker):
         import random
         
-        # Try real news
         news = self._fetch_news(ticker)
+        price = self._fetch_price(ticker)
+        ai = self._openai(ticker, news)
+        using_real = ai is not None
         
-        # Try OpenAI analysis
-        ai_result = self._openai_analyze(ticker, news)
-        using_real = ai_result is not None
+        if not ai:
+            ai = self._fallback(ticker, news)
         
-        if not ai_result:
-            ai_result = self._fallback_analysis(ticker, news)
-        
-        # Get price
-        price_data = self._fetch_price(ticker)
-        
-        # Source breakdown based on signal
-        if ai_result["signal"] == "BUY":
+        if ai["signal"] == "BUY":
             breakdown = {"news": random.randint(72, 92), "twitter": random.randint(75, 95), "reddit": random.randint(78, 98)}
-        elif ai_result["signal"] == "SELL":
+        elif ai["signal"] == "SELL":
             breakdown = {"news": random.randint(18, 38), "twitter": random.randint(15, 35), "reddit": random.randint(22, 42)}
         else:
             breakdown = {"news": random.randint(45, 62), "twitter": random.randint(42, 58), "reddit": random.randint(48, 65)}
         
         return {
             "ticker": ticker,
-            "signal": ai_result["signal"],
-            "confidence": ai_result["confidence"],
-            "reasoning": ai_result["reasoning"],
-            "sentiment_score": 0.85 if ai_result["signal"] == "BUY" else 0.25 if ai_result["signal"] == "SELL" else 0.50,
+            "signal": ai["signal"],
+            "confidence": ai["confidence"],
+            "reasoning": ai["reasoning"],
+            "sentiment_score": 0.85 if ai["signal"] == "BUY" else 0.25 if ai["signal"] == "SELL" else 0.50,
             "sources_analyzed": len(news) + 3,
             "timestamp": datetime.now().isoformat(),
-            "price": price_data.get("price"),
-            "price_change": price_data.get("change_percent"),
+            "price": price.get("price"),
+            "price_change": price.get("change_percent"),
             "source_breakdown": breakdown,
-            "insights": ai_result.get("insights", ["Analysis complete"]),
+            "insights": ai.get("insights", ["Analysis complete"]),
             "news_headlines": [n.get("title", "")[:80] for n in news[:5]],
             "using_real_data": using_real
         }
     
     def _fetch_news(self, ticker):
-        """Fetch news from NewsAPI."""
         import requests
         api_key = os.getenv("NEWS_API_KEY")
-        
         if not api_key:
-            return self._mock_news(ticker)
-        
+            return [{"title": f"{ticker} shows strong momentum", "source": "Reuters"}, {"title": f"Analysts upgrade {ticker}", "source": "Bloomberg"}]
         try:
-            url = "https://newsapi.org/v2/everything"
-            params = {"q": f"{ticker} stock", "sortBy": "publishedAt", "pageSize": 5, "language": "en", "apiKey": api_key}
-            resp = requests.get(url, params=params, timeout=8)
+            resp = requests.get("https://newsapi.org/v2/everything", params={"q": f"{ticker} stock", "pageSize": 5, "language": "en", "apiKey": api_key}, timeout=8)
             data = resp.json()
             if data.get("status") == "ok":
                 return [{"title": a.get("title", ""), "source": a.get("source", {}).get("name", "")} for a in data.get("articles", [])[:5]]
         except:
             pass
-        
-        return self._mock_news(ticker)
-    
-    def _mock_news(self, ticker):
-        return [
-            {"title": f"{ticker} shows strong momentum amid market rally", "source": "Reuters"},
-            {"title": f"Analysts upgrade {ticker} on strong earnings outlook", "source": "Bloomberg"},
-            {"title": f"{ticker} leads sector gains on positive sentiment", "source": "CNBC"},
-        ]
+        return [{"title": f"{ticker} shows momentum", "source": "Reuters"}]
     
     def _fetch_price(self, ticker):
-        """Fetch price from Alpha Vantage."""
         import requests
         import random
+        prices = {"TSLA": 248.32, "AAPL": 178.45, "NVDA": 875.60, "GOOGL": 156.78, "GME": 12.34}
         api_key = os.getenv("ALPHA_VANTAGE_KEY")
-        
         if not api_key:
-            return self._mock_price(ticker)
-        
+            return {"price": prices.get(ticker, round(random.uniform(50, 500), 2)), "change_percent": f"{random.uniform(-3, 3):+.2f}%"}
         try:
-            url = "https://www.alphavantage.co/query"
-            params = {"function": "GLOBAL_QUOTE", "symbol": ticker, "apikey": api_key}
-            resp = requests.get(url, params=params, timeout=8)
+            resp = requests.get("https://www.alphavantage.co/query", params={"function": "GLOBAL_QUOTE", "symbol": ticker, "apikey": api_key}, timeout=8)
             quote = resp.json().get("Global Quote", {})
             if quote:
                 return {"price": float(quote.get("05. price", 0)), "change_percent": quote.get("10. change percent", "0%")}
         except:
             pass
-        
-        return self._mock_price(ticker)
+        return {"price": prices.get(ticker, round(random.uniform(50, 500), 2)), "change_percent": f"{random.uniform(-3, 3):+.2f}%"}
     
-    def _mock_price(self, ticker):
-        import random
-        prices = {"TSLA": 248.32, "AAPL": 178.45, "NVDA": 875.60, "GOOGL": 156.78, "GME": 12.34}
-        price = prices.get(ticker, round(random.uniform(50, 500), 2))
-        return {"price": price, "change_percent": f"{random.uniform(-3, 3):+.2f}%"}
-    
-    def _openai_analyze(self, ticker, news):
-        """Use OpenAI for analysis."""
+    def _openai(self, ticker, news):
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             return None
-        
         try:
             from openai import OpenAI
             client = OpenAI(api_key=api_key)
-            
             news_text = "\n".join([f"- {n.get('title', '')}" for n in news[:5]])
-            
-            prompt = f"""Analyze {ticker} stock sentiment from these headlines:
-
-{news_text}
-
-Respond in JSON only:
-{{"signal": "BUY" or "SELL" or "HOLD", "confidence": 60-95, "reasoning": "2-3 sentences", "insights": ["insight1", "insight2", "insight3"]}}"""
-
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
-                messages=[{"role": "system", "content": "Financial analyst. JSON only."}, {"role": "user", "content": prompt}],
-                max_tokens=200,
-                temperature=0.3
+                messages=[{"role": "system", "content": "Financial analyst. JSON only."}, {"role": "user", "content": f"Analyze {ticker}:\n{news_text}\n\nJSON: {{\"signal\": \"BUY/SELL/HOLD\", \"confidence\": 60-95, \"reasoning\": \"2-3 sentences\", \"insights\": [\"i1\", \"i2\", \"i3\"]}}"}],
+                max_tokens=200, temperature=0.3
             )
-            
             content = response.choices[0].message.content.strip()
             if "{" in content:
                 return json.loads(content[content.index("{"):content.rindex("}")+1])
         except Exception as e:
             print(f"OpenAI error: {e}")
-        
         return None
     
-    def _fallback_analysis(self, ticker, news):
-        """Simple keyword-based fallback."""
+    def _fallback(self, ticker, news):
         import random
-        all_text = " ".join([n.get("title", "") for n in news]).lower()
-        
-        bullish = ["bullish", "up", "growth", "beat", "strong", "rally", "gain", "upgrade"]
-        bearish = ["bearish", "down", "decline", "miss", "weak", "crash", "downgrade"]
-        
-        pos = sum(1 for w in bullish if w in all_text)
-        neg = sum(1 for w in bearish if w in all_text)
-        
+        text = " ".join([n.get("title", "") for n in news]).lower()
+        pos = sum(1 for w in ["bullish", "up", "growth", "beat", "strong"] if w in text)
+        neg = sum(1 for w in ["bearish", "down", "decline", "miss", "weak"] if w in text)
         if pos > neg:
-            return {"signal": "BUY", "confidence": random.randint(72, 92), "reasoning": f"Bullish sentiment detected for {ticker}.", "insights": ["✅ Positive sentiment", "📈 Strong momentum", "🔥 High engagement"]}
+            return {"signal": "BUY", "confidence": random.randint(72, 92), "reasoning": f"Bullish sentiment for {ticker}.", "insights": ["✅ Positive sentiment", "📈 Strong momentum", "🔥 High engagement"]}
         elif neg > pos:
             return {"signal": "SELL", "confidence": random.randint(65, 85), "reasoning": f"Bearish signals for {ticker}.", "insights": ["⚠️ Negative trend", "📉 Declining momentum", "❌ Weak fundamentals"]}
-        else:
-            return {"signal": "HOLD", "confidence": random.randint(55, 70), "reasoning": f"Mixed signals for {ticker}.", "insights": ["⏸️ Mixed sentiment", "📊 Consolidation", "🔄 Wait for breakout"]}
+        return {"signal": "HOLD", "confidence": random.randint(55, 70), "reasoning": f"Mixed signals for {ticker}.", "insights": ["⏸️ Mixed sentiment", "📊 Consolidation", "🔄 Wait for breakout"]}

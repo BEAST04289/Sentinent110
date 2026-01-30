@@ -1,9 +1,7 @@
 {
-  "buildCommand": null,
-  "outputDirectory": "public",
   "rewrites": [
     {
-      "source": "/api/(.*)",
+      "source": "/(.*)",
       "destination": "/api/index.py"
     }
   ]
