@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SENTIENT110 - AI Financial Sentiment Intelligence</title>
     <meta name="description"
-        content="Real-time AI-powered stock sentiment analysis using news, social media, and advanced NLP.">
+        content="Real-time AI-powered stock sentiment analysis using Claude 3.5 Haiku and multi-source data aggregation.">
 
     <!-- TailwindCSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,16 +15,17 @@
             theme: {
                 extend: {
                     colors: {
-                        navy: {
-                            900: '#0D1442',
-                            800: '#1A237E',
-                            700: '#283593',
-                            600: '#3949AB'
+                        dark: {
+                            900: '#0a0a0a',
+                            800: '#141414',
+                            700: '#1f1f1f',
+                            600: '#2a2a2a',
+                            500: '#3a3a3a'
                         },
-                        gold: {
-                            500: '#F39C12',
-                            400: '#F1C40F',
-                            600: '#D68910'
+                        accent: {
+                            500: '#f59e0b',
+                            400: '#fbbf24',
+                            600: '#d97706'
                         }
                     }
                 }
@@ -42,22 +43,22 @@
         }
 
         .glow {
-            box-shadow: 0 0 40px rgba(243, 156, 18, 0.15);
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.15);
         }
 
         .gradient-border {
-            background: linear-gradient(135deg, rgba(243, 156, 18, 0.3), transparent);
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), transparent);
         }
 
         @keyframes pulse-glow {
 
             0%,
             100% {
-                box-shadow: 0 0 20px rgba(243, 156, 18, 0.2);
+                box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
             }
 
             50% {
-                box-shadow: 0 0 40px rgba(243, 156, 18, 0.4);
+                box-shadow: 0 0 40px rgba(245, 158, 11, 0.4);
             }
         }
 
@@ -83,24 +84,24 @@
     </style>
 </head>
 
-<body class="bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 min-h-screen text-white">
+<body class="bg-dark-900 min-h-screen text-white">
 
     <!-- Header -->
-    <header class="border-b border-white/10">
+    <header class="border-b border-white/10 bg-dark-800/50 backdrop-blur-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center">
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-500 to-accent-600 flex items-center justify-center">
                     <span class="text-xl">📈</span>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-gold-500">SENTIENT110</h1>
-                    <p class="text-xs text-white/50">AI Financial Intelligence</p>
+                    <h1 class="text-xl font-bold text-accent-500">SENTIENT110</h1>
+                    <p class="text-xs text-white/50">Powered by Claude 3.5 Haiku</p>
                 </div>
             </div>
             <div class="flex items-center gap-4">
-                <span id="apiStatus" class="text-xs px-3 py-1 rounded-full bg-green-500/20 text-green-400">
-                    ● Live API
+                <span id="apiStatus" class="text-xs px-3 py-1 rounded-full bg-accent-500/20 text-accent-400">
+                    ● Live
                 </span>
                 <a href="https://github.com/BEAST04289/Sentinent110" target="_blank"
                     class="text-white/60 hover:text-white transition">
@@ -116,21 +117,22 @@
         <section class="text-center py-12">
             <h2 class="text-4xl md:text-5xl font-black mb-4">
                 <span class="text-white">Real-Time</span>
-                <span class="text-gold-500"> Sentiment Analysis</span>
+                <span class="text-accent-500"> Sentiment Analysis</span>
             </h2>
             <p class="text-white/60 text-lg max-w-2xl mx-auto mb-8">
-                Powered by NewsAPI, Twitter/X, and GPT-4o-mini. Get instant BUY/SELL/HOLD signals backed by AI.
+                Powered by <span class="text-accent-400 font-semibold">Claude 3.5 Haiku</span> • Real-time NewsAPI +
+                Twitter/X • Instant BUY/SELL/HOLD signals
             </p>
 
             <!-- Search Box -->
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-xl mx-auto">
-                <input type="text" id="tickerInput" placeholder="Enter ticker (e.g., TSLA)" maxlength="5" class="w-full sm:w-64 px-6 py-4 rounded-xl bg-white/10 border border-white/20 
+                <input type="text" id="tickerInput" placeholder="Enter ticker (e.g., TSLA)" maxlength="5" class="w-full sm:w-64 px-6 py-4 rounded-xl bg-dark-700 border border-dark-500 
                            text-white text-lg font-semibold uppercase text-center
-                           focus:outline-none focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20
+                           focus:outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20
                            placeholder:text-white/40 placeholder:normal-case placeholder:font-normal">
-                <button id="analyzeBtn" onclick="analyze()" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-gold-500 to-gold-600
-                           text-white font-bold text-lg
-                           hover:shadow-lg hover:shadow-gold-500/25 hover:-translate-y-0.5
+                <button id="analyzeBtn" onclick="analyze()" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-accent-500 to-accent-600
+                           text-dark-900 font-bold text-lg
+                           hover:shadow-lg hover:shadow-accent-500/25 hover:-translate-y-0.5
                            transition-all duration-200
                            disabled:opacity-50 disabled:cursor-not-allowed">
                     🔍 Analyze
@@ -140,29 +142,31 @@
 
         <!-- Loading State -->
         <div id="loading" class="hidden py-16 text-center">
-            <div class="w-12 h-12 border-4 border-white/10 border-t-gold-500 rounded-full animate-spin mx-auto mb-4">
+            <div class="w-12 h-12 border-4 border-dark-600 border-t-accent-500 rounded-full animate-spin mx-auto mb-4">
             </div>
-            <p class="text-white/60">Analyzing sentiment across multiple sources...</p>
+            <p class="text-white/60">Claude 3.5 Haiku analyzing sentiment...</p>
         </div>
 
         <!-- Results Card -->
         <section id="results" class="hidden slide-up">
-            <div class="bg-white/5 border border-white/10 rounded-2xl p-8 glow">
+            <div class="bg-dark-800 border border-dark-600 rounded-2xl p-8 glow">
 
                 <!-- Ticker Header -->
                 <div
-                    class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 pb-6 border-b border-white/10">
+                    class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 pb-6 border-b border-dark-600">
                     <div>
                         <div class="flex items-center gap-3 mb-2">
                             <h3 id="resultTicker" class="text-4xl font-black">TSLA</h3>
-                            <span id="dataSource" class="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400">
+                            <span id="dataSource"
+                                class="text-xs px-2 py-1 rounded-full bg-accent-500/20 text-accent-400">
                                 Real Data
                             </span>
                         </div>
                         <p id="resultPrice" class="text-2xl text-white/70">$248.32 <span id="priceChange"
                                 class="text-green-400 text-lg">+2.5%</span></p>
                     </div>
-                    <div id="signalBadge" class="mt-4 md:mt-0 px-8 py-4 rounded-xl text-2xl font-black text-center">
+                    <div id="signalBadge"
+                        class="mt-4 md:mt-0 px-8 py-4 rounded-xl text-2xl font-black text-center bg-gradient-to-r from-green-500 to-green-600">
                         🟢 STRONG BUY
                     </div>
                 </div>
@@ -171,9 +175,9 @@
                 <div class="mb-8">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-white/60">AI Confidence</span>
-                        <span id="confidenceText" class="text-2xl font-bold text-gold-500">89%</span>
+                        <span id="confidenceText" class="text-2xl font-bold text-accent-500">89%</span>
                     </div>
-                    <div class="h-3 bg-white/10 rounded-full overflow-hidden">
+                    <div class="h-3 bg-dark-600 rounded-full overflow-hidden">
                         <div id="confidenceFill" class="h-full rounded-full transition-all duration-1000 bg-green-500"
                             style="width: 89%"></div>
                     </div>
@@ -183,17 +187,17 @@
                 <div class="grid md:grid-cols-2 gap-6 mb-8">
 
                     <!-- AI Reasoning -->
-                    <div class="bg-white/5 rounded-xl p-6">
-                        <h4 class="text-gold-500 font-semibold text-sm uppercase tracking-wider mb-3">🧠 AI Reasoning
-                        </h4>
+                    <div class="bg-dark-700 rounded-xl p-6">
+                        <h4 class="text-accent-500 font-semibold text-sm uppercase tracking-wider mb-3">🧠 Claude 3.5
+                            Haiku Analysis</h4>
                         <p id="reasoningText" class="text-white/80 leading-relaxed">
                             Strong bullish momentum driven by positive news and social sentiment.
                         </p>
                     </div>
 
                     <!-- Key Insights -->
-                    <div class="bg-white/5 rounded-xl p-6">
-                        <h4 class="text-gold-500 font-semibold text-sm uppercase tracking-wider mb-3">⚡ Key Insights
+                    <div class="bg-dark-700 rounded-xl p-6">
+                        <h4 class="text-accent-500 font-semibold text-sm uppercase tracking-wider mb-3">⚡ Key Insights
                         </h4>
                         <ul id="keyInsights" class="space-y-2 text-white/80">
                             <li>✅ Strong bullish momentum</li>
@@ -204,16 +208,16 @@
                 </div>
 
                 <!-- Source Breakdown -->
-                <div class="bg-white/5 rounded-xl p-6 mb-8">
-                    <h4 class="text-gold-500 font-semibold text-sm uppercase tracking-wider mb-4">📊 Sentiment by Source
-                    </h4>
+                <div class="bg-dark-700 rounded-xl p-6 mb-8">
+                    <h4 class="text-accent-500 font-semibold text-sm uppercase tracking-wider mb-4">📊 Sentiment by
+                        Source</h4>
                     <div class="grid grid-cols-3 gap-4">
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <span class="text-sm">📰 News</span>
                                 <span id="newsPercent" class="text-green-400 font-semibold">78%</span>
                             </div>
-                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div class="h-2 bg-dark-600 rounded-full overflow-hidden">
                                 <div id="newsBar" class="h-full bg-green-500 rounded-full" style="width: 78%"></div>
                             </div>
                         </div>
@@ -222,7 +226,7 @@
                                 <span class="text-sm">🐦 Twitter</span>
                                 <span id="twitterPercent" class="text-blue-400 font-semibold">85%</span>
                             </div>
-                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div class="h-2 bg-dark-600 rounded-full overflow-hidden">
                                 <div id="twitterBar" class="h-full bg-blue-500 rounded-full" style="width: 85%"></div>
                             </div>
                         </div>
@@ -231,7 +235,7 @@
                                 <span class="text-sm">💬 Reddit</span>
                                 <span id="redditPercent" class="text-orange-400 font-semibold">92%</span>
                             </div>
-                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div class="h-2 bg-dark-600 rounded-full overflow-hidden">
                                 <div id="redditBar" class="h-full bg-orange-500 rounded-full" style="width: 92%"></div>
                             </div>
                         </div>
@@ -239,26 +243,26 @@
                 </div>
 
                 <!-- News Headlines -->
-                <div id="newsSection" class="bg-white/5 rounded-xl p-6 mb-8 hidden">
-                    <h4 class="text-gold-500 font-semibold text-sm uppercase tracking-wider mb-4">📰 Latest Headlines
+                <div id="newsSection" class="bg-dark-700 rounded-xl p-6 mb-8 hidden">
+                    <h4 class="text-accent-500 font-semibold text-sm uppercase tracking-wider mb-4">📰 Latest Headlines
                     </h4>
                     <ul id="newsList" class="space-y-3 text-white/70 text-sm">
                     </ul>
                 </div>
 
                 <!-- Stats & Verify -->
-                <div class="flex flex-col md:flex-row items-center justify-between pt-6 border-t border-white/10">
+                <div class="flex flex-col md:flex-row items-center justify-between pt-6 border-t border-dark-600">
                     <div class="flex gap-8 mb-4 md:mb-0">
                         <div class="text-center">
-                            <p id="sourcesCount" class="text-2xl font-bold text-gold-500">156</p>
+                            <p id="sourcesCount" class="text-2xl font-bold text-accent-500">156</p>
                             <p class="text-xs text-white/50">Sources</p>
                         </div>
                         <div class="text-center">
-                            <p id="sentimentScore" class="text-2xl font-bold text-gold-500">0.85</p>
+                            <p id="sentimentScore" class="text-2xl font-bold text-accent-500">0.85</p>
                             <p class="text-xs text-white/50">Sentiment</p>
                         </div>
                         <div class="text-center">
-                            <p id="timestamp" class="text-2xl font-bold text-gold-500">Now</p>
+                            <p id="timestamp" class="text-2xl font-bold text-accent-500">Now</p>
                             <p class="text-xs text-white/50">Analyzed</p>
                         </div>
                     </div>
@@ -267,7 +271,7 @@
                                    text-white font-semibold
                                    hover:shadow-lg hover:shadow-purple-500/25
                                    transition-all duration-200">
-                            🔗 Verify on Blockchain
+                            🔗 Verify on Story Protocol
                         </button>
                         <p id="txHash" class="mt-2 text-xs text-white/40 hidden"></p>
                     </div>
@@ -278,7 +282,7 @@
         <!-- Trending Section -->
         <section class="mt-16">
             <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
-                <span class="text-gold-500">📊</span> Trending Tickers
+                <span class="text-accent-500">📊</span> Trending Tickers
             </h3>
             <div id="trendingGrid" class="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <!-- Populated by JS -->
@@ -286,10 +290,10 @@
         </section>
 
         <!-- Monitor110 Comparison -->
-        <section class="mt-16 bg-white/5 border border-white/10 rounded-2xl p-8">
+        <section class="mt-16 bg-dark-800 border border-dark-600 rounded-2xl p-8">
             <h3 class="text-xl font-bold mb-6 text-center">
                 Why <span class="text-red-400">Monitor110</span> Failed → How <span
-                    class="text-gold-500">Sentient110</span> Succeeds
+                    class="text-accent-500">Sentient110</span> Succeeds
             </h3>
             <div class="grid md:grid-cols-2 gap-8">
                 <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-6">
@@ -305,7 +309,7 @@
                 <div class="bg-green-500/10 border border-green-500/20 rounded-xl p-6">
                     <h4 class="text-green-400 font-bold mb-4">✅ Sentient110 (2026)</h4>
                     <ul class="space-y-2 text-white/70 text-sm">
-                        <li>• GPT-4o-mini AI analysis</li>
+                        <li>• Claude 3.5 Haiku AI analysis</li>
                         <li>• Real-time NewsAPI + Twitter</li>
                         <li>• Multi-source aggregation</li>
                         <li>• Instant processing (&lt;3 sec)</li>
@@ -315,12 +319,24 @@
             </div>
         </section>
 
+        <!-- Tech Stack -->
+        <section class="mt-16 text-center">
+            <h3 class="text-lg font-semibold text-white/60 mb-4">Powered By</h3>
+            <div class="flex flex-wrap justify-center gap-4">
+                <span class="px-4 py-2 bg-dark-700 rounded-lg text-sm">🧠 Claude 3.5 Haiku</span>
+                <span class="px-4 py-2 bg-dark-700 rounded-lg text-sm">📰 NewsAPI</span>
+                <span class="px-4 py-2 bg-dark-700 rounded-lg text-sm">🐦 Twitter/X API</span>
+                <span class="px-4 py-2 bg-dark-700 rounded-lg text-sm">📊 Alpha Vantage</span>
+                <span class="px-4 py-2 bg-dark-700 rounded-lg text-sm">🔗 Story Protocol</span>
+            </div>
+        </section>
+
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-white/10 mt-16 py-8">
+    <footer class="border-t border-dark-600 mt-16 py-8">
         <div class="max-w-7xl mx-auto px-6 text-center text-white/40 text-sm">
-            <p>Built for <strong class="text-gold-500">FAIL.exe Hackathon 2026</strong></p>
+            <p>Built for <strong class="text-accent-500">FAIL.exe Hackathon 2026</strong></p>
             <p class="mt-2">"Every Failure Deserves a Second Run"</p>
         </div>
     </footer>
@@ -337,10 +353,10 @@
                 const data = await res.json();
                 const statusEl = document.getElementById('apiStatus');
                 if (data.real_api) {
-                    statusEl.innerHTML = '● Live API';
-                    statusEl.className = 'text-xs px-3 py-1 rounded-full bg-green-500/20 text-green-400';
+                    statusEl.innerHTML = '● Live';
+                    statusEl.className = 'text-xs px-3 py-1 rounded-full bg-accent-500/20 text-accent-400';
                 } else {
-                    statusEl.innerHTML = '○ Demo Mode';
+                    statusEl.innerHTML = '○ Demo';
                     statusEl.className = 'text-xs px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400';
                 }
             } catch (e) { }
@@ -359,8 +375,8 @@
                 const grid = document.getElementById('trendingGrid');
                 grid.innerHTML = data.trending.map(t => `
                     <div onclick="analyzeTicker('${t.ticker}')" 
-                         class="bg-white/5 border border-white/10 rounded-xl p-4 cursor-pointer
-                                hover:border-gold-500/50 hover:-translate-y-1 transition-all duration-200">
+                         class="bg-dark-800 border border-dark-600 rounded-xl p-4 cursor-pointer
+                                hover:border-accent-500/50 hover:-translate-y-1 transition-all duration-200">
                         <div class="text-lg font-bold">${t.ticker}</div>
                         <div class="text-sm text-white/50">$${t.price?.toFixed(2) || '---'}</div>
                         <span class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold
@@ -419,9 +435,9 @@
                 const dataSource = document.getElementById('dataSource');
                 if (data.using_real_data) {
                     dataSource.innerHTML = '● Real Data';
-                    dataSource.className = 'text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400';
+                    dataSource.className = 'text-xs px-2 py-1 rounded-full bg-accent-500/20 text-accent-400';
                 } else {
-                    dataSource.innerHTML = '○ Demo Data';
+                    dataSource.innerHTML = '○ Demo';
                     dataSource.className = 'text-xs px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-400';
                 }
 
@@ -466,7 +482,7 @@
                 if (data.news_headlines && data.news_headlines.length) {
                     newsSection.classList.remove('hidden');
                     document.getElementById('newsList').innerHTML =
-                        data.news_headlines.map(h => `<li class="flex items-start gap-2"><span class="text-gold-500">•</span> ${h}</li>`).join('');
+                        data.news_headlines.map(h => `<li class="flex items-start gap-2"><span class="text-accent-500">•</span> ${h}</li>`).join('');
                 } else {
                     newsSection.classList.add('hidden');
                 }
@@ -497,7 +513,7 @@
                 const data = await res.json();
 
                 const txHashEl = document.getElementById('txHash');
-                txHashEl.innerHTML = `✅ TX: <a href="${data.verification_url}" target="_blank" class="text-gold-500 hover:underline">${data.tx_hash.slice(0, 20)}...</a>`;
+                txHashEl.innerHTML = `✅ TX: <a href="${data.verification_url}" target="_blank" class="text-accent-500 hover:underline">${data.tx_hash.slice(0, 20)}...</a>`;
                 txHashEl.classList.remove('hidden');
 
                 btn.textContent = '✅ Verified';
