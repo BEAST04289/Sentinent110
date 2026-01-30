@@ -3,13 +3,15 @@
 **"The Bloomberg Terminal That Died Because AI Didn't Exist"**
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
-![React](https://img.shields.io/badge/React-Vite-61DAFB)
 ![Claude](https://img.shields.io/badge/Claude-3.5_Haiku-9B59B6)
 ![Blockchain](https://img.shields.io/badge/Story_Protocol-Verified-F39C12)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Hackathon](https://img.shields.io/badge/FAIL.exe-2026-red)
+![Live](https://img.shields.io/badge/Status-LIVE-brightgreen)
 
 > *"Every Failure Deserves a Second Run"*
+
+## 🌐 **[LIVE DEMO →](https://sentinent110.vercel.app)**
 
 ---
 
