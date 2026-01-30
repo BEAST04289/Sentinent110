@@ -237,7 +237,7 @@ HTML_CONTENT = '''<!DOCTYPE html>
                 document.getElementById('reasoningText').textContent = data.reasoning;
                 document.getElementById('sourcesCount').textContent = data.sources_analyzed;
                 document.getElementById('sentimentScore').textContent = data.sentiment_score?.toFixed(2) || '0.50';
-                document.getElementById('timestamp').textContent = new Date(data.timestamp).toLocaleTimeString();
+                document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
 
                 const badge = document.getElementById('signalBadge');
                 if (data.signal === 'BUY') { badge.textContent = '🟢 STRONG BUY'; badge.className = 'mt-4 md:mt-0 px-8 py-4 rounded-xl text-2xl font-black text-center bg-gradient-to-r from-green-500 to-green-600'; }
