@@ -4,129 +4,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SENTIENT110 - AI Financial Sentiment</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>SENTIENT110 - AI Financial Sentiment Intelligence</title>
+    <meta name="description"
+        content="Real-time AI-powered stock sentiment analysis using news, social media, and advanced NLP.">
+
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            900: '#0D1442',
+                            800: '#1A237E',
+                            700: '#283593',
+                            600: '#3949AB'
+                        },
+                        gold: {
+                            500: '#F39C12',
+                            400: '#F1C40F',
+                            600: '#D68910'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
     <style>
-        :root {
-            --navy: #1A237E;
-            --navy-dark: #0D1442;
-            --gold: #F39C12;
-            --green: #27AE60;
-            --red: #E74C3C;
-            --yellow: #F1C40F;
-            --purple: #9B59B6;
-            --blue: #4A90E2;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 100%);
-            min-height: 100vh;
-            color: white;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        .glow {
+            box-shadow: 0 0 40px rgba(243, 156, 18, 0.15);
         }
 
-        /* Header */
-        header {
-            text-align: center;
-            padding: 40px 0 30px;
+        .gradient-border {
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.3), transparent);
         }
 
-        .logo {
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--gold);
-            text-shadow: 0 0 30px rgba(243, 156, 18, 0.3);
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(243, 156, 18, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(243, 156, 18, 0.4);
+            }
         }
 
-        .tagline {
-            color: rgba(255, 255, 255, 0.7);
-            font-style: italic;
-            margin-top: 10px;
+        .pulse-glow {
+            animation: pulse-glow 2s infinite;
         }
 
-        /* Search Box */
-        .search-box {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 40px 0;
-        }
-
-        .search-input {
-            padding: 18px 30px;
-            font-size: 1.2rem;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            width: 300px;
-            text-transform: uppercase;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--gold);
-            box-shadow: 0 0 20px rgba(243, 156, 18, 0.2);
-        }
-
-        .search-input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-            text-transform: none;
-            font-weight: 400;
-        }
-
-        .analyze-btn {
-            padding: 18px 40px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, var(--gold) 0%, #e67e22 100%);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .analyze-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(243, 156, 18, 0.3);
-        }
-
-        .analyze-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Results Card */
-        .results-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 40px;
-            margin-top: 20px;
-            display: none;
-        }
-
-        .results-card.show {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
+        @keyframes slide-up {
             from {
                 opacity: 0;
                 transform: translateY(20px);
@@ -138,378 +77,274 @@
             }
         }
 
-        .ticker-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .ticker-name {
-            font-size: 2.5rem;
-            font-weight: 800;
-        }
-
-        .ticker-price {
-            font-size: 1.5rem;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        /* Signal Display */
-        .signal-container {
-            text-align: center;
-            padding: 40px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            margin-bottom: 30px;
-        }
-
-        .confidence-bar {
-            height: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            margin: 20px auto;
-            max-width: 400px;
-            overflow: hidden;
-        }
-
-        .confidence-fill {
-            height: 100%;
-            border-radius: 6px;
-            transition: width 1s ease;
-        }
-
-        .confidence-text {
-            font-size: 3rem;
-            font-weight: 800;
-            margin: 10px 0;
-        }
-
-        .signal-badge {
-            display: inline-block;
-            padding: 15px 50px;
-            font-size: 1.8rem;
-            font-weight: 800;
-            border-radius: 12px;
-            margin-top: 10px;
-        }
-
-        .signal-BUY {
-            background: linear-gradient(135deg, var(--green) 0%, #1e8449 100%);
-        }
-
-        .signal-SELL {
-            background: linear-gradient(135deg, var(--red) 0%, #c0392b 100%);
-        }
-
-        .signal-HOLD {
-            background: linear-gradient(135deg, var(--yellow) 0%, #d4ac0d 100%);
-            color: #333;
-        }
-
-        /* Reasoning Section */
-        .reasoning-section {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
-            padding: 25px;
-            margin-top: 20px;
-        }
-
-        .reasoning-title {
-            font-size: 0.9rem;
-            color: var(--gold);
-            font-weight: 600;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .reasoning-text {
-            line-height: 1.7;
-            color: rgba(255, 255, 255, 0.85);
-        }
-
-        /* Stats Row */
-        .stats-row {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin-top: 30px;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--gold);
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 5px;
-        }
-
-        /* Trending Section */
-        .trending-section {
-            margin-top: 60px;
-        }
-
-        .section-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .trending-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .trending-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .trending-card:hover {
-            transform: translateY(-3px);
-            border-color: var(--gold);
-        }
-
-        .trending-ticker {
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .trending-signal {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-
-        .mini-BUY {
-            background: rgba(39, 174, 96, 0.2);
-            color: var(--green);
-        }
-
-        .mini-SELL {
-            background: rgba(231, 76, 60, 0.2);
-            color: var(--red);
-        }
-
-        .mini-HOLD {
-            background: rgba(241, 196, 15, 0.2);
-            color: var(--yellow);
-        }
-
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 60px;
-            display: none;
-        }
-
-        .loading.show {
-            display: block;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top-color: var(--gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 40px;
-            margin-top: 60px;
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 0.9rem;
-        }
-
-        footer a {
-            color: var(--gold);
-            text-decoration: none;
+        .slide-up {
+            animation: slide-up 0.5s ease-out;
         }
     </style>
 </head>
 
-<body>
-    <div class="container">
-        <header>
-            <div class="logo">📈 SENTIENT110</div>
-            <p class="tagline">"Every Failure Deserves a Second Run"</p>
-        </header>
+<body class="bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 min-h-screen text-white">
 
-        <div class="search-box">
-            <input type="text" class="search-input" id="tickerInput" placeholder="Enter ticker (e.g., TSLA)"
-                maxlength="5">
-            <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">
-                🔍 Analyze
-            </button>
-        </div>
-
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Analyzing sentiment across 150+ sources...</p>
-        </div>
-
-        <div class="results-card" id="results">
-            <div class="ticker-header">
-                <span class="ticker-name" id="resultTicker">TSLA</span>
-                <span class="ticker-price" id="resultPrice">$248.32</span>
-            </div>
-
-            <div class="signal-container">
-                <div class="confidence-bar">
-                    <div class="confidence-fill" id="confidenceFill"></div>
+    <!-- Header -->
+    <header class="border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center">
+                    <span class="text-xl">📈</span>
                 </div>
-                <div class="confidence-text" id="confidenceText">89%</div>
-                <div class="signal-badge" id="signalBadge">STRONG BUY</div>
+                <div>
+                    <h1 class="text-xl font-bold text-gold-500">SENTIENT110</h1>
+                    <p class="text-xs text-white/50">AI Financial Intelligence</p>
+                </div>
             </div>
-
-            <div class="reasoning-section">
-                <div class="reasoning-title">🧠 AI Reasoning</div>
-                <p class="reasoning-text" id="reasoningText"></p>
+            <div class="flex items-center gap-4">
+                <span id="apiStatus" class="text-xs px-3 py-1 rounded-full bg-green-500/20 text-green-400">
+                    ● Live API
+                </span>
+                <a href="https://github.com/BEAST04289/Sentinent110" target="_blank"
+                    class="text-white/60 hover:text-white transition">
+                    GitHub
+                </a>
             </div>
+        </div>
+    </header>
 
-            <!-- Sentiment Breakdown Chart -->
-            <div style="display: flex; gap: 20px; margin-top: 25px;">
-                <div style="flex: 1; background: rgba(255,255,255,0.03); border-radius: 12px; padding: 20px;">
-                    <div
-                        style="font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">
-                        📊 Source Breakdown</div>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
+    <main class="max-w-7xl mx-auto px-6 py-8">
+
+        <!-- Hero Section -->
+        <section class="text-center py-12">
+            <h2 class="text-4xl md:text-5xl font-black mb-4">
+                <span class="text-white">Real-Time</span>
+                <span class="text-gold-500"> Sentiment Analysis</span>
+            </h2>
+            <p class="text-white/60 text-lg max-w-2xl mx-auto mb-8">
+                Powered by NewsAPI, Twitter/X, and GPT-4o-mini. Get instant BUY/SELL/HOLD signals backed by AI.
+            </p>
+
+            <!-- Search Box -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-xl mx-auto">
+                <input type="text" id="tickerInput" placeholder="Enter ticker (e.g., TSLA)" maxlength="5" class="w-full sm:w-64 px-6 py-4 rounded-xl bg-white/10 border border-white/20 
+                           text-white text-lg font-semibold uppercase text-center
+                           focus:outline-none focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20
+                           placeholder:text-white/40 placeholder:normal-case placeholder:font-normal">
+                <button id="analyzeBtn" onclick="analyze()" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-gold-500 to-gold-600
+                           text-white font-bold text-lg
+                           hover:shadow-lg hover:shadow-gold-500/25 hover:-translate-y-0.5
+                           transition-all duration-200
+                           disabled:opacity-50 disabled:cursor-not-allowed">
+                    🔍 Analyze
+                </button>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <div id="loading" class="hidden py-16 text-center">
+            <div class="w-12 h-12 border-4 border-white/10 border-t-gold-500 rounded-full animate-spin mx-auto mb-4">
+            </div>
+            <p class="text-white/60">Analyzing sentiment across multiple sources...</p>
+        </div>
+
+        <!-- Results Card -->
+        <section id="results" class="hidden slide-up">
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-8 glow">
+
+                <!-- Ticker Header -->
+                <div
+                    class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 pb-6 border-b border-white/10">
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 id="resultTicker" class="text-4xl font-black">TSLA</h3>
+                            <span id="dataSource" class="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400">
+                                Real Data
+                            </span>
+                        </div>
+                        <p id="resultPrice" class="text-2xl text-white/70">$248.32 <span id="priceChange"
+                                class="text-green-400 text-lg">+2.5%</span></p>
+                    </div>
+                    <div id="signalBadge" class="mt-4 md:mt-0 px-8 py-4 rounded-xl text-2xl font-black text-center">
+                        🟢 STRONG BUY
+                    </div>
+                </div>
+
+                <!-- Confidence -->
+                <div class="mb-8">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-white/60">AI Confidence</span>
+                        <span id="confidenceText" class="text-2xl font-bold text-gold-500">89%</span>
+                    </div>
+                    <div class="h-3 bg-white/10 rounded-full overflow-hidden">
+                        <div id="confidenceFill" class="h-full rounded-full transition-all duration-1000 bg-green-500"
+                            style="width: 89%"></div>
+                    </div>
+                </div>
+
+                <!-- Two Column Layout -->
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+
+                    <!-- AI Reasoning -->
+                    <div class="bg-white/5 rounded-xl p-6">
+                        <h4 class="text-gold-500 font-semibold text-sm uppercase tracking-wider mb-3">🧠 AI Reasoning
+                        </h4>
+                        <p id="reasoningText" class="text-white/80 leading-relaxed">
+                            Strong bullish momentum driven by positive news and social sentiment.
+                        </p>
+                    </div>
+
+                    <!-- Key Insights -->
+                    <div class="bg-white/5 rounded-xl p-6">
+                        <h4 class="text-gold-500 font-semibold text-sm uppercase tracking-wider mb-3">⚡ Key Insights
+                        </h4>
+                        <ul id="keyInsights" class="space-y-2 text-white/80">
+                            <li>✅ Strong bullish momentum</li>
+                            <li>✅ Positive analyst coverage</li>
+                            <li>📈 Volume surge detected</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Source Breakdown -->
+                <div class="bg-white/5 rounded-xl p-6 mb-8">
+                    <h4 class="text-gold-500 font-semibold text-sm uppercase tracking-wider mb-4">📊 Sentiment by Source
+                    </h4>
+                    <div class="grid grid-cols-3 gap-4">
                         <div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span style="font-size: 0.85rem;">📰 News</span>
-                                <span style="font-size: 0.85rem; color: var(--green);" id="newsPercent">78%</span>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm">📰 News</span>
+                                <span id="newsPercent" class="text-green-400 font-semibold">78%</span>
                             </div>
-                            <div
-                                style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                                <div id="newsBar"
-                                    style="width: 78%; height: 100%; background: var(--green); border-radius: 4px;">
-                                </div>
+                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div id="newsBar" class="h-full bg-green-500 rounded-full" style="width: 78%"></div>
                             </div>
                         </div>
                         <div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span style="font-size: 0.85rem;">🐦 Twitter</span>
-                                <span style="font-size: 0.85rem; color: var(--blue);" id="twitterPercent">85%</span>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm">🐦 Twitter</span>
+                                <span id="twitterPercent" class="text-blue-400 font-semibold">85%</span>
                             </div>
-                            <div
-                                style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                                <div id="twitterBar"
-                                    style="width: 85%; height: 100%; background: var(--blue); border-radius: 4px;">
-                                </div>
+                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div id="twitterBar" class="h-full bg-blue-500 rounded-full" style="width: 85%"></div>
                             </div>
                         </div>
                         <div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span style="font-size: 0.85rem;">💬 Reddit</span>
-                                <span style="font-size: 0.85rem; color: #FF6B35;" id="redditPercent">92%</span>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm">💬 Reddit</span>
+                                <span id="redditPercent" class="text-orange-400 font-semibold">92%</span>
                             </div>
-                            <div
-                                style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                                <div id="redditBar"
-                                    style="width: 92%; height: 100%; background: #FF6B35; border-radius: 4px;"></div>
+                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div id="redditBar" class="h-full bg-orange-500 rounded-full" style="width: 92%"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div style="flex: 1; background: rgba(255,255,255,0.03); border-radius: 12px; padding: 20px;">
-                    <div
-                        style="font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">
-                        ⚡ Key Insights</div>
-                    <ul style="list-style: none; font-size: 0.9rem; line-height: 1.8; color: rgba(255,255,255,0.8);"
-                        id="keyInsights">
-                        <li>✅ Strong social media momentum</li>
-                        <li>✅ Positive analyst coverage</li>
-                        <li>✅ Volume surge detected</li>
+
+                <!-- News Headlines -->
+                <div id="newsSection" class="bg-white/5 rounded-xl p-6 mb-8 hidden">
+                    <h4 class="text-gold-500 font-semibold text-sm uppercase tracking-wider mb-4">📰 Latest Headlines
+                    </h4>
+                    <ul id="newsList" class="space-y-3 text-white/70 text-sm">
+                    </ul>
+                </div>
+
+                <!-- Stats & Verify -->
+                <div class="flex flex-col md:flex-row items-center justify-between pt-6 border-t border-white/10">
+                    <div class="flex gap-8 mb-4 md:mb-0">
+                        <div class="text-center">
+                            <p id="sourcesCount" class="text-2xl font-bold text-gold-500">156</p>
+                            <p class="text-xs text-white/50">Sources</p>
+                        </div>
+                        <div class="text-center">
+                            <p id="sentimentScore" class="text-2xl font-bold text-gold-500">0.85</p>
+                            <p class="text-xs text-white/50">Sentiment</p>
+                        </div>
+                        <div class="text-center">
+                            <p id="timestamp" class="text-2xl font-bold text-gold-500">Now</p>
+                            <p class="text-xs text-white/50">Analyzed</p>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button id="verifyBtn" onclick="verifyOnChain()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600
+                                   text-white font-semibold
+                                   hover:shadow-lg hover:shadow-purple-500/25
+                                   transition-all duration-200">
+                            🔗 Verify on Blockchain
+                        </button>
+                        <p id="txHash" class="mt-2 text-xs text-white/40 hidden"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trending Section -->
+        <section class="mt-16">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span class="text-gold-500">📊</span> Trending Tickers
+            </h3>
+            <div id="trendingGrid" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+
+        <!-- Monitor110 Comparison -->
+        <section class="mt-16 bg-white/5 border border-white/10 rounded-2xl p-8">
+            <h3 class="text-xl font-bold mb-6 text-center">
+                Why <span class="text-red-400">Monitor110</span> Failed → How <span
+                    class="text-gold-500">Sentient110</span> Succeeds
+            </h3>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-6">
+                    <h4 class="text-red-400 font-bold mb-4">❌ Monitor110 (2008)</h4>
+                    <ul class="space-y-2 text-white/70 text-sm">
+                        <li>• Rule-based keyword matching</li>
+                        <li>• Manual data curation</li>
+                        <li>• No social media integration</li>
+                        <li>• Slow processing (hours)</li>
+                        <li>• $20M+ infrastructure costs</li>
+                    </ul>
+                </div>
+                <div class="bg-green-500/10 border border-green-500/20 rounded-xl p-6">
+                    <h4 class="text-green-400 font-bold mb-4">✅ Sentient110 (2026)</h4>
+                    <ul class="space-y-2 text-white/70 text-sm">
+                        <li>• GPT-4o-mini AI analysis</li>
+                        <li>• Real-time NewsAPI + Twitter</li>
+                        <li>• Multi-source aggregation</li>
+                        <li>• Instant processing (&lt;3 sec)</li>
+                        <li>• ~$0.001 per analysis</li>
                     </ul>
                 </div>
             </div>
+        </section>
 
-            <div class="stats-row">
-                <div class="stat-item">
-                    <div class="stat-value" id="sourcesCount">156</div>
-                    <div class="stat-label">Sources Analyzed</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="sentimentScore">0.85</div>
-                    <div class="stat-label">Sentiment Score</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="timestamp">Now</div>
-                    <div class="stat-label">Analyzed At</div>
-                </div>
-            </div>
+    </main>
 
-            <div style="text-align: center; margin-top: 25px;">
-                <button id="verifyBtn" onclick="verifyOnChain()" style="
-                    padding: 12px 30px;
-                    background: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%);
-                    border: none;
-                    border-radius: 8px;
-                    color: white;
-                    font-weight: 600;
-                    cursor: pointer;
-                    font-size: 0.95rem;
-                ">
-                    🔗 Verify on Blockchain
-                </button>
-                <p id="txHash"
-                    style="margin-top: 10px; font-size: 0.8rem; color: rgba(255,255,255,0.5); display: none;"></p>
-            </div>
+    <!-- Footer -->
+    <footer class="border-t border-white/10 mt-16 py-8">
+        <div class="max-w-7xl mx-auto px-6 text-center text-white/40 text-sm">
+            <p>Built for <strong class="text-gold-500">FAIL.exe Hackathon 2026</strong></p>
+            <p class="mt-2">"Every Failure Deserves a Second Run"</p>
         </div>
-
-        <div class="trending-section">
-            <h3 class="section-title">📊 Trending Tickers</h3>
-            <div class="trending-grid" id="trendingGrid">
-                <!-- Populated by JS -->
-            </div>
-        </div>
-
-        <footer>
-            <p>Built for <strong>FAIL.exe Hackathon 2026</strong></p>
-            <p style="margin-top:10px;">Reviving <a href="#">Monitor110</a> with modern AI</p>
-            <p style="margin-top:10px;">
-                <a href="https://github.com/BEAST04289/Sentinent110" target="_blank">GitHub</a>
-            </p>
-        </footer>
-    </div>
+    </footer>
 
     <script>
         const API_URL = '';
         let currentAnalysis = null;
 
-        // Load trending on page load
-        document.addEventListener('DOMContentLoaded', loadTrending);
+        // Check API status on load
+        document.addEventListener('DOMContentLoaded', async () => {
+            loadTrending();
+            try {
+                const res = await fetch(`${API_URL}/api/health`);
+                const data = await res.json();
+                const statusEl = document.getElementById('apiStatus');
+                if (data.real_api) {
+                    statusEl.innerHTML = '● Live API';
+                    statusEl.className = 'text-xs px-3 py-1 rounded-full bg-green-500/20 text-green-400';
+                } else {
+                    statusEl.innerHTML = '○ Demo Mode';
+                    statusEl.className = 'text-xs px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400';
+                }
+            } catch (e) { }
+        });
 
         // Enter key to search
         document.getElementById('tickerInput').addEventListener('keypress', (e) => {
@@ -523,9 +358,17 @@
 
                 const grid = document.getElementById('trendingGrid');
                 grid.innerHTML = data.trending.map(t => `
-                    <div class="trending-card" onclick="analyzeTicker('${t.ticker}')">
-                        <div class="trending-ticker">${t.ticker}</div>
-                        <span class="trending-signal mini-${t.signal}">${t.signal} ${t.confidence}%</span>
+                    <div onclick="analyzeTicker('${t.ticker}')" 
+                         class="bg-white/5 border border-white/10 rounded-xl p-4 cursor-pointer
+                                hover:border-gold-500/50 hover:-translate-y-1 transition-all duration-200">
+                        <div class="text-lg font-bold">${t.ticker}</div>
+                        <div class="text-sm text-white/50">$${t.price?.toFixed(2) || '---'}</div>
+                        <span class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold
+                                     ${t.signal === 'BUY' ? 'bg-green-500/20 text-green-400' :
+                        t.signal === 'SELL' ? 'bg-red-500/20 text-red-400' :
+                            'bg-yellow-500/20 text-yellow-400'}">
+                            ${t.signal} ${t.confidence}%
+                        </span>
                     </div>
                 `).join('');
             } catch (err) {
@@ -547,9 +390,9 @@
             const results = document.getElementById('results');
 
             btn.disabled = true;
-            loading.classList.add('show');
-            results.classList.remove('show');
-            document.getElementById('txHash').style.display = 'none';
+            loading.classList.remove('hidden');
+            results.classList.add('hidden');
+            document.getElementById('txHash').classList.add('hidden');
 
             try {
                 const res = await fetch(`${API_URL}/api/analyze`, {
@@ -563,26 +406,46 @@
 
                 // Update UI
                 document.getElementById('resultTicker').textContent = data.ticker;
-                document.getElementById('resultPrice').textContent = data.price ? `$${data.price.toFixed(2)}` : '';
+                document.getElementById('resultPrice').innerHTML = data.price
+                    ? `$${data.price.toFixed(2)} <span id="priceChange" class="${data.price_change?.includes('-') ? 'text-red-400' : 'text-green-400'} text-lg">${data.price_change || ''}</span>`
+                    : '';
                 document.getElementById('confidenceText').textContent = `${data.confidence}%`;
                 document.getElementById('reasoningText').textContent = data.reasoning;
                 document.getElementById('sourcesCount').textContent = data.sources_analyzed;
                 document.getElementById('sentimentScore').textContent = data.sentiment_score.toFixed(2);
                 document.getElementById('timestamp').textContent = new Date(data.timestamp).toLocaleTimeString();
 
+                // Data source badge
+                const dataSource = document.getElementById('dataSource');
+                if (data.using_real_data) {
+                    dataSource.innerHTML = '● Real Data';
+                    dataSource.className = 'text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400';
+                } else {
+                    dataSource.innerHTML = '○ Demo Data';
+                    dataSource.className = 'text-xs px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-400';
+                }
+
                 // Signal badge
                 const badge = document.getElementById('signalBadge');
-                badge.textContent = data.signal === 'BUY' ? '🟢 STRONG BUY' :
-                    data.signal === 'SELL' ? '🔴 SELL' : '🟡 HOLD';
-                badge.className = `signal-badge signal-${data.signal}`;
+                if (data.signal === 'BUY') {
+                    badge.textContent = '🟢 STRONG BUY';
+                    badge.className = 'mt-4 md:mt-0 px-8 py-4 rounded-xl text-2xl font-black text-center bg-gradient-to-r from-green-500 to-green-600';
+                } else if (data.signal === 'SELL') {
+                    badge.textContent = '🔴 SELL';
+                    badge.className = 'mt-4 md:mt-0 px-8 py-4 rounded-xl text-2xl font-black text-center bg-gradient-to-r from-red-500 to-red-600';
+                } else {
+                    badge.textContent = '🟡 HOLD';
+                    badge.className = 'mt-4 md:mt-0 px-8 py-4 rounded-xl text-2xl font-black text-center bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900';
+                }
 
                 // Confidence bar
                 const fill = document.getElementById('confidenceFill');
                 fill.style.width = `${data.confidence}%`;
-                fill.style.background = data.signal === 'BUY' ? 'var(--green)' :
-                    data.signal === 'SELL' ? 'var(--red)' : 'var(--yellow)';
+                fill.className = `h-full rounded-full transition-all duration-1000 ${data.signal === 'BUY' ? 'bg-green-500' :
+                        data.signal === 'SELL' ? 'bg-red-500' : 'bg-yellow-500'
+                    }`;
 
-                // Update source breakdown if available
+                // Source breakdown
                 if (data.source_breakdown) {
                     document.getElementById('newsPercent').textContent = `${data.source_breakdown.news}%`;
                     document.getElementById('newsBar').style.width = `${data.source_breakdown.news}%`;
@@ -592,21 +455,31 @@
                     document.getElementById('redditBar').style.width = `${data.source_breakdown.reddit}%`;
                 }
 
-                // Update insights if available
-                if (data.insights) {
-                    const insightsList = document.getElementById('keyInsights');
-                    insightsList.innerHTML = data.insights.map(i => `<li>${i}</li>`).join('');
+                // Key insights
+                if (data.insights && data.insights.length) {
+                    document.getElementById('keyInsights').innerHTML =
+                        data.insights.map(i => `<li>${i}</li>`).join('');
                 }
 
-                loading.classList.remove('show');
-                results.classList.add('show');
+                // News headlines
+                const newsSection = document.getElementById('newsSection');
+                if (data.news_headlines && data.news_headlines.length) {
+                    newsSection.classList.remove('hidden');
+                    document.getElementById('newsList').innerHTML =
+                        data.news_headlines.map(h => `<li class="flex items-start gap-2"><span class="text-gold-500">•</span> ${h}</li>`).join('');
+                } else {
+                    newsSection.classList.add('hidden');
+                }
+
+                loading.classList.add('hidden');
+                results.classList.remove('hidden');
 
             } catch (err) {
                 console.error('Analysis failed:', err);
                 alert('Analysis failed. Please try again.');
             } finally {
                 btn.disabled = false;
-                loading.classList.remove('show');
+                loading.classList.add('hidden');
             }
         }
 
@@ -614,7 +487,7 @@
             if (!currentAnalysis) return;
 
             const btn = document.getElementById('verifyBtn');
-            btn.textContent = '⏳ Storing on chain...';
+            btn.textContent = '⏳ Storing...';
             btn.disabled = true;
 
             try {
@@ -624,14 +497,14 @@
                 const data = await res.json();
 
                 const txHashEl = document.getElementById('txHash');
-                txHashEl.innerHTML = `✅ Verified! TX: <a href="${data.verification_url}" target="_blank" style="color: var(--gold);">${data.tx_hash.slice(0, 20)}...</a>`;
-                txHashEl.style.display = 'block';
+                txHashEl.innerHTML = `✅ TX: <a href="${data.verification_url}" target="_blank" class="text-gold-500 hover:underline">${data.tx_hash.slice(0, 20)}...</a>`;
+                txHashEl.classList.remove('hidden');
 
-                btn.textContent = '✅ Verified on Blockchain';
-                btn.style.background = 'linear-gradient(135deg, #27AE60 0%, #1e8449 100%)';
+                btn.textContent = '✅ Verified';
+                btn.className = 'px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold';
             } catch (err) {
                 console.error('Verification failed:', err);
-                btn.textContent = '❌ Verification Failed';
+                btn.textContent = '❌ Failed';
             }
         }
     </script>
