@@ -141,7 +141,7 @@ HTML_MAIN = '''<!DOCTYPE html>
                     class="w-full sm:w-64 px-6 py-4 rounded-xl bg-dark-700 border border-dark-500 text-white text-lg font-semibold uppercase text-center focus:outline-none focus:border-accent-500 placeholder:text-white/40 placeholder:normal-case placeholder:font-normal">
                 <button id="analyzeBtn" onclick="analyze()" 
                     class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-accent-500 to-accent-600 text-white font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50">
-                    🔍 Analyze
+                    Analyze
                 </button>
             </div>
         </section>
