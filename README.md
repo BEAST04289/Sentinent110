@@ -116,6 +116,18 @@ Not raw data. Not feeds. Just:
 
 With confidence score and plain English reasoning.
 
+### 🎨 Modern UI/UX Features (NEW!)
+| Feature | Description |
+|---------|-------------|
+| 🇮🇳 **BSE/NSE Section** | Dedicated trending section for Indian stocks |
+| 🇺🇸 **NYSE/NASDAQ Section** | Dedicated trending section for US stocks |
+| 🧠 **Brain Animation** | Pulsing AI brain during analysis |
+| ✅ **Toast Notifications** | Sleek slide-up notifications |
+| 🕐 **Search History** | Quick access to last 5 searches |
+| 💀 **Skeleton Loaders** | Animated loading placeholders |
+| 📖 **How it Works** | 4-step visual guide |
+| 🐦 **Share to Twitter** | Post your analysis results |
+
 ---
 
 ## 🔬 How It Works
