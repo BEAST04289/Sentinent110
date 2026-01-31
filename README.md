@@ -44,6 +44,23 @@ In 2005, **Monitor110** raised **$20M** to build exactly what we're building - A
 - **GPT-4o-mini fallback** for reliability
 - Real-time sentiment scoring with confidence levels
 
+### 🏷️ Stock Ticker System
+We use **stock ticker symbols** (like TSLA, AAPL, NVDA) instead of company names. Here's why:
+
+| Ticker | Company | Exchange |
+|--------|---------|----------|
+| `TSLA` | Tesla, Inc. | NASDAQ |
+| `AAPL` | Apple Inc. | NASDAQ |
+| `NVDA` | NVIDIA Corporation | NASDAQ |
+| `GOOGL` | Alphabet (Google) | NASDAQ |
+| `META` | Meta (Facebook) | NASDAQ |
+
+**Why tickers?**
+- ✅ **Standardized**: Same codes used by NYSE/NASDAQ worldwide
+- ✅ **Precise**: "GOOGL" vs "GOOG" are different share classes
+- ✅ **API-friendly**: NewsAPI and Alpha Vantage use tickers
+- ✅ **No ambiguity**: "Apple" could mean the fruit, "AAPL" means the stock
+
 ### ⚡ Smart Caching (NEW!)
 ```
 Same stock query within 10 minutes?
