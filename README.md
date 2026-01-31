@@ -11,7 +11,7 @@
 
 > *"Every Failure Deserves a Second Run"*
 
-## 🌐 **[LIVE DEMO →](https://sentinent110.vercel.app)** | **[PRICING →](https://sentinent110.vercel.app/pricing)**
+## 🌐 **[LIVE DEMO →](https://sentinent110.vercel.app)** 
 
 ---
 
