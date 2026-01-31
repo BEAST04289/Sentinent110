@@ -333,7 +333,7 @@ HTML_MAIN = '''<!DOCTYPE html>
                     <h4 class="text-white/70 font-bold mb-3">Connect</h4>
                     <div class="flex gap-4">
                         <a href="https://github.com/BEAST04289/Sentinent110" target="_blank" class="text-white/50 hover:text-accent-500 transition">GitHub</a>
-                        <a href="/pricing" class="text-white/50 hover:text-accent-500 transition">Pricing</a>
+                        <a href="https://www.linkedin.com/in/shaurya--upadhyay/" target="_blank" class="text-white/50 hover:text-accent-500 transition">LinkedIn</a>
                     </div>
                 </div>
             </div>
