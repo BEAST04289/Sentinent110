@@ -1,6 +1,7 @@
 # 📈 SENTIENT110
 ### AI-Powered Financial Sentiment Analysis
 **"The Bloomberg Terminal That Died Because AI Didn't Exist"**
+*"In 2005, Monitor110 raised $20M to map market sentiment. They failed because humans can't read 10,000 tweets a minute. In 2026, AI can."*
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![Claude](https://img.shields.io/badge/Claude-3.5_Haiku-9B59B6)
@@ -36,7 +37,15 @@ In 2005, **Monitor110** raised **$20M** to build exactly what we're building - A
 **We're completing their mission with modern technology.**
 
 ---
+### The "Financial Analyst" Persona: We don't just ask Claude "How is Tesla doing?" We inject a structured system prompt that forces the AI to weigh:
 
+- **Quantitative Data** (Price action from Alpha Vantage)
+
+- **Qualitative Hype** (Twitter/News volume)
+
+- **Risk Factors (Regulatory news)** before outputting a confidence score.
+
+---
 ## ✨ Features
 
 ### 🧠 AI-Powered Analysis
@@ -94,6 +103,7 @@ Same stock query within 10 minutes?
 
 ### 🔗 Blockchain Verification
 Every prediction is **timestamped on Story Protocol:**
+*Wall Street analysts delete their bad predictions. We can't. Every 'BUY' signal is minted as an IP asset on Story Protocol. We build a verifiable track record that cannot be faked.*
 - Immutable proof of what we said and when
 - Users can verify our track record
 - No "we never said that" problems
