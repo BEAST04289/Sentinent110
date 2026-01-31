@@ -75,6 +75,15 @@ HTML_MAIN = '''<!DOCTYPE html>
         .modal.active { display: flex; align-items: center; justify-content: center; }
         @keyframes slide-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .slide-up { animation: slide-up 0.5s ease-out; }
+        /* Toast */
+        .toast { position: fixed; bottom: 20px; right: 20px; padding: 16px 24px; border-radius: 12px; z-index: 200; animation: slide-up 0.3s ease-out; }
+        .toast-success { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .toast-error { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+        /* Brain animation */
+        @keyframes pulse-brain { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } }
+        .brain-pulse { animation: pulse-brain 1.5s ease-in-out infinite; }
+        @keyframes thinking { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
+        .thinking::after { content: '...'; animation: thinking 1.5s infinite; }
     </style>
 </head>
 <body class="bg-dark-900 min-h-screen text-white">
@@ -144,8 +153,9 @@ HTML_MAIN = '''<!DOCTYPE html>
         </section>
 
         <div id="loading" class="hidden py-16 text-center">
-            <div class="w-12 h-12 border-4 border-dark-600 border-t-accent-500 rounded-full animate-spin mx-auto mb-4"></div>
-            <p class="text-white/60">Claude 3.5 Haiku analyzing sentiment...</p>
+            <div class="text-6xl brain-pulse mb-4">🧠</div>
+            <p class="text-white/60 text-lg">Claude 3.5 Haiku is thinking<span class="thinking"></span></p>
+            <p class="text-white/40 text-sm mt-2">Analyzing news, social media & market data</p>
         </div>
 
         <!-- Cache indicator -->
@@ -224,9 +234,34 @@ HTML_MAIN = '''<!DOCTYPE html>
             </div>
         </section>
 
+        <!-- Search History -->
+        <section id="searchHistory" class="hidden mt-8">
+            <h4 class="text-sm text-white/50 mb-2">Recent Searches</h4>
+            <div id="historyList" class="flex flex-wrap gap-2"></div>
+        </section>
+
+        <!-- Indian Stocks Section -->
         <section class="mt-16">
-            <h3 class="text-xl font-bold mb-6 flex items-center gap-2"><span class="text-accent-500">📊</span> Trending Tickers</h3>
-            <div id="trendingGrid" class="grid grid-cols-2 md:grid-cols-5 gap-4"></div>
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">🇮🇳 <span class="text-accent-500">BSE/NSE</span> Trending</h3>
+            <div id="indianGrid" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-4 animate-pulse"><div class="h-4 bg-dark-600 rounded w-20 mb-2"></div><div class="h-3 bg-dark-600 rounded w-16"></div></div>
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-4 animate-pulse"><div class="h-4 bg-dark-600 rounded w-20 mb-2"></div><div class="h-3 bg-dark-600 rounded w-16"></div></div>
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-4 animate-pulse"><div class="h-4 bg-dark-600 rounded w-20 mb-2"></div><div class="h-3 bg-dark-600 rounded w-16"></div></div>
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-4 animate-pulse"><div class="h-4 bg-dark-600 rounded w-20 mb-2"></div><div class="h-3 bg-dark-600 rounded w-16"></div></div>
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-4 animate-pulse"><div class="h-4 bg-dark-600 rounded w-20 mb-2"></div><div class="h-3 bg-dark-600 rounded w-16"></div></div>
+            </div>
+        </section>
+
+        <!-- US Stocks Section -->
+        <section class="mt-12">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">🇺🇸 <span class="text-accent-500">NYSE/NASDAQ</span> Trending</h3>
+            <div id="usGrid" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-4 animate-pulse"><div class="h-4 bg-dark-600 rounded w-20 mb-2"></div><div class="h-3 bg-dark-600 rounded w-16"></div></div>
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-4 animate-pulse"><div class="h-4 bg-dark-600 rounded w-20 mb-2"></div><div class="h-3 bg-dark-600 rounded w-16"></div></div>
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-4 animate-pulse"><div class="h-4 bg-dark-600 rounded w-20 mb-2"></div><div class="h-3 bg-dark-600 rounded w-16"></div></div>
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-4 animate-pulse"><div class="h-4 bg-dark-600 rounded w-20 mb-2"></div><div class="h-3 bg-dark-600 rounded w-16"></div></div>
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-4 animate-pulse"><div class="h-4 bg-dark-600 rounded w-20 mb-2"></div><div class="h-3 bg-dark-600 rounded w-16"></div></div>
+            </div>
         </section>
 
         <section class="mt-16 bg-dark-800 border border-dark-600 rounded-2xl p-8">
@@ -253,12 +288,57 @@ HTML_MAIN = '''<!DOCTYPE html>
                 <span class="px-4 py-2 bg-dark-700 rounded-lg text-sm">🔗 Story Protocol</span>
             </div>
         </section>
+
+        <!-- How it Works Section -->
+        <section class="mt-16">
+            <h3 class="text-2xl font-bold mb-8 text-center">How it <span class="text-accent-500">Works</span></h3>
+            <div class="grid md:grid-cols-4 gap-6">
+                <div class="text-center p-6">
+                    <div class="text-4xl mb-4">🔍</div>
+                    <h4 class="font-bold mb-2">1. Enter Ticker</h4>
+                    <p class="text-white/50 text-sm">Type any stock symbol (US or Indian)</p>
+                </div>
+                <div class="text-center p-6">
+                    <div class="text-4xl mb-4">📰</div>
+                    <h4 class="font-bold mb-2">2. Gather Data</h4>
+                    <p class="text-white/50 text-sm">We fetch news, social media & prices</p>
+                </div>
+                <div class="text-center p-6">
+                    <div class="text-4xl mb-4">🧠</div>
+                    <h4 class="font-bold mb-2">3. AI Analysis</h4>
+                    <p class="text-white/50 text-sm">Claude 3.5 Haiku analyzes sentiment</p>
+                </div>
+                <div class="text-center p-6">
+                    <div class="text-4xl mb-4">📊</div>
+                    <h4 class="font-bold mb-2">4. Get Signal</h4>
+                    <p class="text-white/50 text-sm">Receive BUY/SELL/HOLD recommendation</p>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <footer class="border-t border-dark-600 mt-16 py-8">
-        <div class="max-w-7xl mx-auto px-6 text-center text-white/40 text-sm">
-            <p>Built for <strong class="text-accent-500">FAIL.exe Hackathon 2026</strong></p>
-            <p class="mt-2">"Every Failure Deserves a Second Run"</p>
+    <footer class="border-t border-dark-600 mt-16 py-12">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <h4 class="text-accent-500 font-bold mb-3">SENTIENT110</h4>
+                    <p class="text-white/50 text-sm">AI-powered financial sentiment analysis platform, built for the modern investor.</p>
+                </div>
+                <div>
+                    <h4 class="text-white/70 font-bold mb-3">Technologies</h4>
+                    <p class="text-white/50 text-sm">Claude 3.5 Haiku • NewsAPI • Story Protocol • Alpha Vantage</p>
+                </div>
+                <div>
+                    <h4 class="text-white/70 font-bold mb-3">Connect</h4>
+                    <div class="flex gap-4">
+                        <a href="https://github.com/BEAST04289/Sentinent110" target="_blank" class="text-white/50 hover:text-accent-500 transition">GitHub</a>
+                        <a href="/pricing" class="text-white/50 hover:text-accent-500 transition">Pricing</a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-dark-600 pt-6 text-center text-white/40 text-sm">
+                <p>Built for <strong class="text-accent-500">FAIL.exe Hackathon 2026</strong> • "Every Failure Deserves a Second Run"</p>
+            </div>
         </div>
     </footer>
 
@@ -318,11 +398,11 @@ HTML_MAIN = '''<!DOCTYPE html>
                     localStorage.setItem('token', data.token);
                     updateAuthUI();
                     closeAuth();
-                    alert(isLoginMode ? 'Welcome back!' : 'Account created!');
+                    showToast(isLoginMode ? 'Welcome back!' : 'Account created!', 'success');
                 } else {
-                    alert(data.error || 'Authentication failed');
+                    showToast(data.error || 'Authentication failed', 'error');
                 }
-            } catch (err) { alert('Error: ' + err.message); }
+            } catch (err) { showToast('Error: ' + err.message, 'error'); }
         }
 
         function logout() {
@@ -334,22 +414,52 @@ HTML_MAIN = '''<!DOCTYPE html>
 
         document.getElementById('tickerInput').addEventListener('keypress', e => { if (e.key === 'Enter') analyze(); });
 
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Search history
+        let searchHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+        function updateSearchHistory(ticker) {
+            searchHistory = [ticker, ...searchHistory.filter(t => t !== ticker)].slice(0, 5);
+            localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+            renderHistory();
+        }
+        function renderHistory() {
+            if (searchHistory.length === 0) return;
+            document.getElementById('searchHistory').classList.remove('hidden');
+            document.getElementById('historyList').innerHTML = searchHistory.map(t => 
+                `<button onclick="document.getElementById('tickerInput').value='${t}';analyze()" class="px-3 py-1 bg-dark-700 hover:bg-dark-600 rounded-full text-sm text-white/70">${t}</button>`
+            ).join('');
+        }
+        renderHistory();
+
+        function renderCard(t) {
+            const isIndian = t.ticker.includes('.BSE') || t.ticker.includes('.NSE');
+            const currency = isIndian ? '₹' : '$';
+            return `
+            <div onclick="document.getElementById('tickerInput').value='${t.ticker}';analyze()" 
+                 class="bg-dark-800 border border-dark-600 rounded-xl p-4 cursor-pointer hover:border-accent-500/50 hover:-translate-y-1 transition-all">
+                <div class="text-lg font-bold">${t.ticker}</div>
+                <div class="text-xs text-white/40">${t.name || ''}</div>
+                <div class="text-sm text-white/50">${currency}${t.price?.toFixed(2) || '---'}</div>
+                <span class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold ${t.signal === 'BUY' ? 'bg-green-500/20 text-green-400' : t.signal === 'SELL' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'}">${t.signal} ${t.confidence}%</span>
+            </div>`;
+        }
+
         async function loadTrending() {
             try {
                 const res = await fetch('/api/trending');
                 const data = await res.json();
-                document.getElementById('trendingGrid').innerHTML = data.trending.map(t => {
-                    const isIndian = t.ticker.includes('.BSE') || t.ticker.includes('.NSE');
-                    const currency = isIndian ? '₹' : '$';
-                    return `
-                    <div onclick="document.getElementById('tickerInput').value='${t.ticker}';analyze()" 
-                         class="bg-dark-800 border border-dark-600 rounded-xl p-4 cursor-pointer hover:border-accent-500/50 hover:-translate-y-1 transition-all">
-                        <div class="text-lg font-bold">${t.ticker}</div>
-                        <div class="text-xs text-white/40">${t.name || ''}</div>
-                        <div class="text-sm text-white/50">${currency}${t.price?.toFixed(2) || '---'}</div>
-                        <span class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold ${t.signal === 'BUY' ? 'bg-green-500/20 text-green-400' : t.signal === 'SELL' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'}">${t.signal} ${t.confidence}%</span>
-                    </div>
-                `}).join('');
+                const indian = data.trending.filter(t => t.ticker.includes('.BSE') || t.ticker.includes('.NSE'));
+                const us = data.trending.filter(t => !t.ticker.includes('.BSE') && !t.ticker.includes('.NSE'));
+                document.getElementById('indianGrid').innerHTML = indian.map(renderCard).join('');
+                document.getElementById('usGrid').innerHTML = us.map(renderCard).join('');
             } catch (e) { console.error(e); }
         }
 
@@ -407,7 +517,9 @@ HTML_MAIN = '''<!DOCTYPE html>
 
                 document.getElementById('dataSource').innerHTML = data.using_real_data ? '● Real Data' : '○ Demo';
                 document.getElementById('results').classList.remove('hidden');
-            } catch (e) { console.error(e); alert('Analysis failed'); }
+                updateSearchHistory(ticker);
+                showToast(`${ticker} analysis complete!`, 'success');
+            } catch (e) { console.error(e); showToast('Analysis failed', 'error'); }
             finally { document.getElementById('analyzeBtn').disabled = false; document.getElementById('loading').classList.add('hidden'); }
         }
 
@@ -569,11 +681,13 @@ class handler(BaseHTTPRequestHandler):
                 {"ticker": "RELIANCE.BSE", "signal": "BUY", "confidence": 91, "price": 2845.50, "name": "Reliance Industries"},
                 {"ticker": "TCS.BSE", "signal": "BUY", "confidence": 88, "price": 4125.75, "name": "Tata Consultancy"},
                 {"ticker": "INFY.BSE", "signal": "HOLD", "confidence": 72, "price": 1876.30, "name": "Infosys"},
+                {"ticker": "HDFCBANK.BSE", "signal": "BUY", "confidence": 85, "price": 1654.20, "name": "HDFC Bank"},
+                {"ticker": "ITC.BSE", "signal": "BUY", "confidence": 79, "price": 465.80, "name": "ITC Limited"},
                 {"ticker": "TSLA", "signal": "BUY", "confidence": 89, "price": 248.32, "name": "Tesla"},
                 {"ticker": "NVDA", "signal": "BUY", "confidence": 94, "price": 875.60, "name": "NVIDIA"},
                 {"ticker": "AAPL", "signal": "HOLD", "confidence": 67, "price": 178.45, "name": "Apple"},
-                {"ticker": "HDFCBANK.BSE", "signal": "BUY", "confidence": 85, "price": 1654.20, "name": "HDFC Bank"},
-                {"ticker": "TATAMOTORS.BSE", "signal": "BUY", "confidence": 82, "price": 945.15, "name": "Tata Motors"}
+                {"ticker": "GOOGL", "signal": "BUY", "confidence": 81, "price": 156.78, "name": "Alphabet"},
+                {"ticker": "META", "signal": "BUY", "confidence": 86, "price": 524.30, "name": "Meta"}
             ]})
         elif path.startswith("/api/verify/"):
             self._send_json({"verified": False})
