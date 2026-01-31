@@ -228,6 +228,7 @@ HTML_MAIN = '''<!DOCTYPE html>
                     </div>
                     <div class="text-center">
                         <button id="verifyBtn" onclick="verifyOnChain()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold">🔗 Verify on Story Protocol</button>
+                        <button onclick="shareToTwitter()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold">🐦 Share</button>
                         <p id="txHash" class="mt-2 text-xs text-white/40 hidden"></p>
                     </div>
                 </div>
@@ -534,6 +535,14 @@ HTML_MAIN = '''<!DOCTYPE html>
                 document.getElementById('txHash').classList.remove('hidden');
                 btn.textContent = '✅ Verified';
             } catch (e) { btn.textContent = '❌ Failed'; }
+        }
+
+        function shareToTwitter() {
+            if (!currentAnalysis) return;
+            const text = `🚀 Just analyzed $${currentAnalysis.ticker} with Sentient110!\n\n📊 Signal: ${currentAnalysis.signal}\n💯 Confidence: ${currentAnalysis.confidence}%\n\nPowered by Claude 3.5 Haiku AI\n\n#AI #Trading #Stocks`;
+            const url = 'https://sentinent110.vercel.app';
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+            showToast('Opening Twitter...', 'success');
         }
     </script>
 </body>
