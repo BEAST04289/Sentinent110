@@ -338,14 +338,18 @@ HTML_MAIN = '''<!DOCTYPE html>
             try {
                 const res = await fetch('/api/trending');
                 const data = await res.json();
-                document.getElementById('trendingGrid').innerHTML = data.trending.map(t => `
+                document.getElementById('trendingGrid').innerHTML = data.trending.map(t => {
+                    const isIndian = t.ticker.includes('.BSE') || t.ticker.includes('.NSE');
+                    const currency = isIndian ? '₹' : '$';
+                    return `
                     <div onclick="document.getElementById('tickerInput').value='${t.ticker}';analyze()" 
                          class="bg-dark-800 border border-dark-600 rounded-xl p-4 cursor-pointer hover:border-accent-500/50 hover:-translate-y-1 transition-all">
                         <div class="text-lg font-bold">${t.ticker}</div>
-                        <div class="text-sm text-white/50">$${t.price?.toFixed(2) || '---'}</div>
+                        <div class="text-xs text-white/40">${t.name || ''}</div>
+                        <div class="text-sm text-white/50">${currency}${t.price?.toFixed(2) || '---'}</div>
                         <span class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold ${t.signal === 'BUY' ? 'bg-green-500/20 text-green-400' : t.signal === 'SELL' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'}">${t.signal} ${t.confidence}%</span>
                     </div>
-                `).join('');
+                `}).join('');
             } catch (e) { console.error(e); }
         }
 
@@ -562,11 +566,14 @@ class handler(BaseHTTPRequestHandler):
             })
         elif path == "/api/trending":
             self._send_json({"trending": [
-                {"ticker": "TSLA", "signal": "BUY", "confidence": 89, "price": 248.32},
-                {"ticker": "NVDA", "signal": "BUY", "confidence": 94, "price": 875.60},
-                {"ticker": "AAPL", "signal": "HOLD", "confidence": 67, "price": 178.45},
-                {"ticker": "GOOGL", "signal": "BUY", "confidence": 78, "price": 156.78},
-                {"ticker": "GME", "signal": "SELL", "confidence": 72, "price": 12.34}
+                {"ticker": "RELIANCE.BSE", "signal": "BUY", "confidence": 91, "price": 2845.50, "name": "Reliance Industries"},
+                {"ticker": "TCS.BSE", "signal": "BUY", "confidence": 88, "price": 4125.75, "name": "Tata Consultancy"},
+                {"ticker": "INFY.BSE", "signal": "HOLD", "confidence": 72, "price": 1876.30, "name": "Infosys"},
+                {"ticker": "TSLA", "signal": "BUY", "confidence": 89, "price": 248.32, "name": "Tesla"},
+                {"ticker": "NVDA", "signal": "BUY", "confidence": 94, "price": 875.60, "name": "NVIDIA"},
+                {"ticker": "AAPL", "signal": "HOLD", "confidence": 67, "price": 178.45, "name": "Apple"},
+                {"ticker": "HDFCBANK.BSE", "signal": "BUY", "confidence": 85, "price": 1654.20, "name": "HDFC Bank"},
+                {"ticker": "TATAMOTORS.BSE", "signal": "BUY", "confidence": 82, "price": 945.15, "name": "Tata Motors"}
             ]})
         elif path.startswith("/api/verify/"):
             self._send_json({"verified": False})

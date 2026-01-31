@@ -45,18 +45,29 @@ In 2005, **Monitor110** raised **$20M** to build exactly what we're building - A
 - Real-time sentiment scoring with confidence levels
 
 ### 🏷️ Stock Ticker System
-We use **stock ticker symbols** (like TSLA, AAPL, NVDA) instead of company names. Here's why:
+We use **stock ticker symbols** instead of company names. We support **both US (NYSE/NASDAQ) and Indian (BSE/NSE)** markets!
 
+#### 🇺🇸 US Stocks (NYSE/NASDAQ)
 | Ticker | Company | Exchange |
 |--------|---------|----------|
 | `TSLA` | Tesla, Inc. | NASDAQ |
 | `AAPL` | Apple Inc. | NASDAQ |
 | `NVDA` | NVIDIA Corporation | NASDAQ |
 | `GOOGL` | Alphabet (Google) | NASDAQ |
-| `META` | Meta (Facebook) | NASDAQ |
+
+#### 🇮🇳 Indian Stocks (BSE/NSE)
+| Ticker | Company | Exchange |
+|--------|---------|----------|
+| `RELIANCE.BSE` | Reliance Industries | BSE |
+| `TCS.BSE` | Tata Consultancy Services | BSE |
+| `INFY.BSE` | Infosys | BSE |
+| `HDFCBANK.BSE` | HDFC Bank | BSE |
+| `TATAMOTORS.BSE` | Tata Motors | BSE |
+
+> **💡 Tip:** For Indian stocks, add `.BSE` or `.NSE` suffix to the ticker symbol!
 
 **Why tickers?**
-- ✅ **Standardized**: Same codes used by NYSE/NASDAQ worldwide
+- ✅ **Standardized**: Same codes used globally
 - ✅ **Precise**: "GOOGL" vs "GOOG" are different share classes
 - ✅ **API-friendly**: NewsAPI and Alpha Vantage use tickers
 - ✅ **No ambiguity**: "Apple" could mean the fruit, "AAPL" means the stock
