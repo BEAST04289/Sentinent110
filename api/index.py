@@ -54,6 +54,18 @@ HTML_MAIN = '''<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SENTIENT110 - AI Financial Sentiment Intelligence</title>
+    <meta name="description" content="AI-powered BUY/SELL/HOLD signals for stocks. Powered by Claude 3.5 Haiku. Supports US (NYSE/NASDAQ) and Indian (BSE/NSE) markets.">
+    <meta name="keywords" content="stock analysis, AI trading, sentiment analysis, Claude AI, BSE, NSE, NASDAQ, NYSE">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>">
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sentinent110.vercel.app">
+    <meta property="og:title" content="SENTIENT110 - AI Financial Sentiment">
+    <meta property="og:description" content="Get instant BUY/SELL/HOLD signals powered by Claude 3.5 Haiku AI. Supports US and Indian markets.">
+    <meta property="og:image" content="https://sentinent110.vercel.app/og-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SENTIENT110 - AI Financial Sentiment">
+    <meta name="twitter:description" content="Get instant BUY/SELL/HOLD signals powered by Claude 3.5 Haiku AI.">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
