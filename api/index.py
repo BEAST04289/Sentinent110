@@ -143,8 +143,8 @@ HTML_MAIN = '''<!DOCTYPE html>
                 Powered by <span class="text-accent-400 font-semibold">Claude 3.5 Haiku</span> • Real-time NewsAPI + Twitter/X • Instant BUY/SELL/HOLD signals
             </p>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-xl mx-auto">
-                <input type="text" id="tickerInput" placeholder="Enter ticker (e.g., TSLA)" maxlength="5" 
-                    class="w-full sm:w-64 px-6 py-4 rounded-xl bg-dark-700 border border-dark-500 text-white text-lg font-semibold uppercase text-center focus:outline-none focus:border-accent-500 placeholder:text-white/40 placeholder:normal-case placeholder:font-normal">
+                <input type="text" id="tickerInput" placeholder="Enter ticker (e.g., RELIANCE.BSE)" maxlength="15" 
+                    class="w-full sm:w-72 px-6 py-4 rounded-xl bg-dark-700 border border-dark-500 text-white text-lg font-semibold uppercase text-center focus:outline-none focus:border-accent-500 placeholder:text-white/40 placeholder:normal-case placeholder:font-normal">
                 <button id="analyzeBtn" onclick="analyze()" 
                     class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-accent-500 to-accent-600 text-white font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50">
                     Analyze
@@ -320,18 +320,18 @@ HTML_MAIN = '''<!DOCTYPE html>
 
     <footer class="border-t border-dark-600 mt-16 py-12">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="grid md:grid-cols-3 gap-8 mb-8">
+            <div class="grid md:grid-cols-3 gap-8 mb-8 text-center md:text-left">
                 <div>
                     <h4 class="text-accent-500 font-bold mb-3">SENTIENT110</h4>
                     <p class="text-white/50 text-sm">AI-powered financial sentiment analysis platform, built for the modern investor.</p>
                 </div>
-                <div>
+                <div class="md:text-center">
                     <h4 class="text-white/70 font-bold mb-3">Technologies</h4>
                     <p class="text-white/50 text-sm">Claude 3.5 Haiku • NewsAPI • Story Protocol • Alpha Vantage</p>
                 </div>
-                <div>
+                <div class="md:text-right">
                     <h4 class="text-white/70 font-bold mb-3">Connect</h4>
-                    <div class="flex gap-4">
+                    <div class="flex gap-4 justify-center md:justify-end">
                         <a href="https://github.com/BEAST04289/Sentinent110" target="_blank" class="text-white/50 hover:text-accent-500 transition">GitHub</a>
                         <a href="https://www.linkedin.com/in/shaurya--upadhyay/" target="_blank" class="text-white/50 hover:text-accent-500 transition">LinkedIn</a>
                     </div>
