@@ -104,7 +104,7 @@ HTML_MAIN = '''<!DOCTYPE html>
             <div class="flex items-center gap-3">
                 <a href="/" class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-500 to-accent-600 flex items-center justify-center">
-                        <span class="text-xl">📈</span>
+                        <span class="text-xl font-bold text-white">S</span>
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-accent-500">SENTIENT110</h1>
