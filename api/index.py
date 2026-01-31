@@ -103,9 +103,6 @@ HTML_MAIN = '''<!DOCTYPE html>
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <a href="/" class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-500 to-accent-600 flex items-center justify-center">
-                        <span class="text-xl font-bold text-white">S</span>
-                    </div>
                     <div>
                         <h1 class="text-xl font-bold text-accent-500">SENTIENT110</h1>
                         <p class="text-xs text-white/50">Powered by Claude 3.5 Haiku</p>
@@ -113,11 +110,11 @@ HTML_MAIN = '''<!DOCTYPE html>
                 </a>
             </div>
             <div class="flex items-center gap-4">
-                <a href="/pricing" class="text-white/60 hover:text-white transition">Pricing</a>
                 <span id="apiStatus" class="text-xs px-3 py-1 rounded-full bg-accent-500/20 text-accent-400">● Live</span>
+                <a href="/pricing" class="text-white/60 hover:text-white transition">Pricing</a>
                 <div id="authButtons">
                     <button onclick="openAuth('login')" class="px-4 py-2 rounded-lg text-white/70 hover:text-white transition">Sign In</button>
-                    <button onclick="openAuth('signup')" class="px-4 py-2 rounded-lg bg-accent-500 text-dark-900 font-semibold hover:bg-accent-400 transition">Sign Up</button>
+                    <button onclick="openAuth('signup')" class="px-4 py-2 rounded-lg bg-accent-500 text-white font-semibold hover:bg-accent-400 transition">Sign Up</button>
                 </div>
                 <div id="userMenu" class="hidden flex items-center gap-3">
                     <span id="userName" class="text-white/70"></span>
