@@ -1,17 +1,54 @@
 """
 Sentient110 - Vercel Serverless Handler
-Serves both API and frontend from single handler
+Full featured: Cache, Auth, Pricing, Analysis
+All using FREE resources (in-memory storage)
 """
 
 from http.server import BaseHTTPRequestHandler
 import json
 import os
 import hashlib
+import time
 from datetime import datetime
 from urllib.parse import parse_qs, urlparse
 
-# HTML content inline
-HTML_CONTENT = '''<!DOCTYPE html>
+# ============= IN-MEMORY STORAGE (Free!) =============
+# Cache: {ticker: {data: {...}, expires: timestamp}}
+ANALYSIS_CACHE = {}
+CACHE_TTL = 600  # 10 minutes
+
+# Users: {email: {password_hash, name, plan, created}}
+USERS_DB = {}
+
+# Sessions: {token: {email, expires}}
+SESSIONS = {}
+
+# ============= HELPER FUNCTIONS =============
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def generate_token(email):
+    data = f"{email}|{time.time()}|{os.urandom(16).hex()}"
+    return hashlib.sha256(data.encode()).hexdigest()[:32]
+
+def get_cached(ticker):
+    """Get cached analysis if not expired."""
+    if ticker in ANALYSIS_CACHE:
+        cached = ANALYSIS_CACHE[ticker]
+        if time.time() < cached["expires"]:
+            return cached["data"]
+    return None
+
+def set_cache(ticker, data):
+    """Cache analysis for 10 minutes."""
+    ANALYSIS_CACHE[ticker] = {
+        "data": data,
+        "expires": time.time() + CACHE_TTL
+    }
+
+# ============= HTML PAGES =============
+
+HTML_MAIN = '''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -34,25 +71,58 @@ HTML_CONTENT = '''<!DOCTYPE html>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .glow { box-shadow: 0 0 40px rgba(245, 158, 11, 0.15); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; }
+        .modal.active { display: flex; align-items: center; justify-content: center; }
         @keyframes slide-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .slide-up { animation: slide-up 0.5s ease-out; }
     </style>
 </head>
 <body class="bg-dark-900 min-h-screen text-white">
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="bg-dark-800 border border-dark-600 rounded-2xl p-8 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="authTitle" class="text-2xl font-bold">Sign In</h3>
+                <button onclick="closeAuth()" class="text-white/50 hover:text-white text-2xl">&times;</button>
+            </div>
+            <form id="authForm" onsubmit="handleAuth(event)">
+                <input type="text" id="authName" placeholder="Name" class="hidden w-full px-4 py-3 mb-4 rounded-xl bg-dark-700 border border-dark-500 text-white focus:outline-none focus:border-accent-500">
+                <input type="email" id="authEmail" placeholder="Email" required class="w-full px-4 py-3 mb-4 rounded-xl bg-dark-700 border border-dark-500 text-white focus:outline-none focus:border-accent-500">
+                <input type="password" id="authPassword" placeholder="Password" required class="w-full px-4 py-3 mb-4 rounded-xl bg-dark-700 border border-dark-500 text-white focus:outline-none focus:border-accent-500">
+                <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-accent-500 to-accent-600 text-dark-900 font-bold">
+                    <span id="authBtnText">Sign In</span>
+                </button>
+            </form>
+            <p class="text-center text-white/50 mt-4">
+                <span id="authSwitch">Don't have an account? <button onclick="toggleAuthMode()" class="text-accent-500 hover:underline">Sign Up</button></span>
+            </p>
+        </div>
+    </div>
+
     <header class="border-b border-white/10 bg-dark-800/50 backdrop-blur-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-500 to-accent-600 flex items-center justify-center">
-                    <span class="text-xl">📈</span>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold text-accent-500">SENTIENT110</h1>
-                    <p class="text-xs text-white/50">Powered by Claude 3.5 Haiku</p>
-                </div>
+                <a href="/" class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-500 to-accent-600 flex items-center justify-center">
+                        <span class="text-xl">📈</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-accent-500">SENTIENT110</h1>
+                        <p class="text-xs text-white/50">Powered by Claude 3.5 Haiku</p>
+                    </div>
+                </a>
             </div>
             <div class="flex items-center gap-4">
+                <a href="/pricing" class="text-white/60 hover:text-white transition">Pricing</a>
                 <span id="apiStatus" class="text-xs px-3 py-1 rounded-full bg-accent-500/20 text-accent-400">● Live</span>
-                <a href="https://github.com/BEAST04289/Sentinent110" target="_blank" class="text-white/60 hover:text-white transition">GitHub</a>
+                <div id="authButtons">
+                    <button onclick="openAuth('login')" class="px-4 py-2 rounded-lg text-white/70 hover:text-white transition">Sign In</button>
+                    <button onclick="openAuth('signup')" class="px-4 py-2 rounded-lg bg-accent-500 text-dark-900 font-semibold hover:bg-accent-400 transition">Sign Up</button>
+                </div>
+                <div id="userMenu" class="hidden flex items-center gap-3">
+                    <span id="userName" class="text-white/70"></span>
+                    <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition">Logout</button>
+                </div>
             </div>
         </div>
     </header>
@@ -79,6 +149,11 @@ HTML_CONTENT = '''<!DOCTYPE html>
         <div id="loading" class="hidden py-16 text-center">
             <div class="w-12 h-12 border-4 border-dark-600 border-t-accent-500 rounded-full animate-spin mx-auto mb-4"></div>
             <p class="text-white/60">Claude 3.5 Haiku analyzing sentiment...</p>
+        </div>
+
+        <!-- Cache indicator -->
+        <div id="cacheInfo" class="hidden text-center mb-4">
+            <span class="text-xs px-3 py-1 rounded-full bg-green-500/20 text-green-400">⚡ Cached result (instant)</span>
         </div>
 
         <section id="results" class="hidden slide-up">
@@ -192,13 +267,73 @@ HTML_CONTENT = '''<!DOCTYPE html>
 
     <script>
         let currentAnalysis = null;
+        let isLoginMode = true;
+        let currentUser = JSON.parse(localStorage.getItem('user') || 'null');
 
         document.addEventListener('DOMContentLoaded', () => {
             loadTrending();
+            updateAuthUI();
             fetch('/api/health').then(r => r.json()).then(d => {
                 document.getElementById('apiStatus').innerHTML = d.real_api ? '● Live' : '○ Demo';
             }).catch(() => {});
         });
+
+        function updateAuthUI() {
+            if (currentUser) {
+                document.getElementById('authButtons').classList.add('hidden');
+                document.getElementById('userMenu').classList.remove('hidden');
+                document.getElementById('userName').textContent = currentUser.name || currentUser.email;
+            } else {
+                document.getElementById('authButtons').classList.remove('hidden');
+                document.getElementById('userMenu').classList.add('hidden');
+            }
+        }
+
+        function openAuth(mode) {
+            isLoginMode = mode === 'login';
+            document.getElementById('authModal').classList.add('active');
+            document.getElementById('authTitle').textContent = isLoginMode ? 'Sign In' : 'Create Account';
+            document.getElementById('authBtnText').textContent = isLoginMode ? 'Sign In' : 'Sign Up';
+            document.getElementById('authName').classList.toggle('hidden', isLoginMode);
+            document.getElementById('authSwitch').innerHTML = isLoginMode 
+                ? 'Don\\'t have an account? <button onclick="toggleAuthMode()" class="text-accent-500 hover:underline">Sign Up</button>'
+                : 'Already have an account? <button onclick="toggleAuthMode()" class="text-accent-500 hover:underline">Sign In</button>';
+        }
+
+        function closeAuth() { document.getElementById('authModal').classList.remove('active'); }
+        function toggleAuthMode() { openAuth(isLoginMode ? 'signup' : 'login'); }
+
+        async function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const name = document.getElementById('authName').value;
+
+            const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/signup';
+            const body = isLoginMode ? { email, password } : { email, password, name };
+
+            try {
+                const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                const data = await res.json();
+                if (data.success) {
+                    currentUser = data.user;
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                    localStorage.setItem('token', data.token);
+                    updateAuthUI();
+                    closeAuth();
+                    alert(isLoginMode ? 'Welcome back!' : 'Account created!');
+                } else {
+                    alert(data.error || 'Authentication failed');
+                }
+            } catch (err) { alert('Error: ' + err.message); }
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            updateAuthUI();
+        }
 
         document.getElementById('tickerInput').addEventListener('keypress', e => { if (e.key === 'Enter') analyze(); });
 
@@ -224,11 +359,17 @@ HTML_CONTENT = '''<!DOCTYPE html>
             document.getElementById('analyzeBtn').disabled = true;
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('results').classList.add('hidden');
+            document.getElementById('cacheInfo').classList.add('hidden');
 
             try {
                 const res = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ticker }) });
                 const data = await res.json();
                 currentAnalysis = data;
+
+                // Show cache indicator
+                if (data.cached) {
+                    document.getElementById('cacheInfo').classList.remove('hidden');
+                }
 
                 document.getElementById('resultTicker').textContent = data.ticker;
                 document.getElementById('resultPrice').innerHTML = data.price ? `$${data.price.toFixed(2)} <span class="${data.price_change?.includes('-') ? 'text-red-400' : 'text-green-400'}">${data.price_change || ''}</span>` : '';
@@ -285,17 +426,143 @@ HTML_CONTENT = '''<!DOCTYPE html>
 </body>
 </html>'''
 
+HTML_PRICING = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - SENTIENT110</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: {
+                dark: { 900: '#0a0a0a', 800: '#141414', 700: '#1f1f1f', 600: '#2a2a2a', 500: '#3a3a3a' },
+                accent: { 500: '#f59e0b', 400: '#fbbf24', 600: '#d97706' }
+            }}}
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-dark-900 min-h-screen text-white">
+    <header class="border-b border-white/10 bg-dark-800/50 backdrop-blur-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-500 to-accent-600 flex items-center justify-center">
+                    <span class="text-xl">📈</span>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-accent-500">SENTIENT110</h1>
+                    <p class="text-xs text-white/50">Powered by Claude 3.5 Haiku</p>
+                </div>
+            </a>
+            <a href="/" class="text-white/60 hover:text-white transition">← Back to App</a>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 py-16">
+        <div class="text-center mb-16">
+            <h1 class="text-4xl md:text-5xl font-black mb-4">
+                <span class="text-white">Simple, Transparent</span>
+                <span class="text-accent-500"> Pricing</span>
+            </h1>
+            <p class="text-white/60 text-lg">Choose the plan that fits your trading needs</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Free Plan -->
+            <div class="bg-dark-800 border border-dark-600 rounded-2xl p-8 relative">
+                <h3 class="text-xl font-bold mb-2">Free</h3>
+                <p class="text-white/50 mb-6">For casual investors</p>
+                <div class="mb-8">
+                    <span class="text-4xl font-black">$0</span>
+                    <span class="text-white/50">/month</span>
+                </div>
+                <ul class="space-y-3 mb-8 text-white/70">
+                    <li class="flex items-center gap-2"><span class="text-green-400">✓</span> 5 analyses per day</li>
+                    <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Basic AI insights</li>
+                    <li class="flex items-center gap-2"><span class="text-green-400">✓</span> News sentiment</li>
+                    <li class="flex items-center gap-2"><span class="text-white/30">✗</span> <span class="text-white/40">Twitter/Reddit sentiment</span></li>
+                    <li class="flex items-center gap-2"><span class="text-white/30">✗</span> <span class="text-white/40">Blockchain verification</span></li>
+                </ul>
+                <button class="w-full py-3 rounded-xl border border-accent-500 text-accent-500 font-semibold hover:bg-accent-500/10 transition">Current Plan</button>
+            </div>
+
+            <!-- Pro Plan -->
+            <div class="bg-dark-800 border-2 border-accent-500 rounded-2xl p-8 relative transform scale-105">
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-accent-500 text-dark-900 rounded-full text-sm font-bold">POPULAR</div>
+                <h3 class="text-xl font-bold mb-2">Pro</h3>
+                <p class="text-white/50 mb-6">For active traders</p>
+                <div class="mb-8">
+                    <span class="text-4xl font-black text-accent-500">$29</span>
+                    <span class="text-white/50">/month</span>
+                </div>
+                <ul class="space-y-3 mb-8 text-white/70">
+                    <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Unlimited analyses</li>
+                    <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Advanced AI insights</li>
+                    <li class="flex items-center gap-2"><span class="text-green-400">✓</span> All data sources</li>
+                    <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Blockchain verification</li>
+                    <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Priority support</li>
+                </ul>
+                <button onclick="alert('Demo mode - Payment coming soon!')" class="w-full py-3 rounded-xl bg-gradient-to-r from-accent-500 to-accent-600 text-dark-900 font-bold hover:shadow-lg hover:shadow-accent-500/25 transition">Upgrade to Pro</button>
+            </div>
+
+            <!-- Enterprise Plan -->
+            <div class="bg-dark-800 border border-dark-600 rounded-2xl p-8 relative">
+                <h3 class="text-xl font-bold mb-2">Enterprise</h3>
+                <p class="text-white/50 mb-6">For institutions</p>
+                <div class="mb-8">
+                    <span class="text-4xl font-black">$299</span>
+                    <span class="text-white/50">/month</span>
+                </div>
+                <ul class="space-y-3 mb-8 text-white/70">
+                    <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Everything in Pro</li>
+                    <li class="flex items-center gap-2"><span class="text-green-400">✓</span> API access</li>
+                    <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Custom integrations</li>
+                    <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Dedicated support</li>
+                    <li class="flex items-center gap-2"><span class="text-green-400">✓</span> SLA guarantee</li>
+                </ul>
+                <button onclick="alert('Demo mode - Contact sales@sentient110.com')" class="w-full py-3 rounded-xl border border-white/30 text-white font-semibold hover:bg-white/10 transition">Contact Sales</button>
+            </div>
+        </div>
+
+        <div class="mt-16 text-center">
+            <p class="text-white/50 mb-4">Compare to Monitor110's pricing (2008):</p>
+            <div class="inline-block bg-dark-800 border border-dark-600 rounded-xl p-6">
+                <p class="text-red-400 line-through text-2xl font-bold">$24,000/year</p>
+                <p class="text-green-400 text-3xl font-bold mt-2">Now from $0/month</p>
+                <p class="text-white/40 mt-2">800x cheaper with modern AI</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="border-t border-dark-600 mt-16 py-8">
+        <div class="max-w-7xl mx-auto px-6 text-center text-white/40 text-sm">
+            <p>Built for <strong class="text-accent-500">FAIL.exe Hackathon 2026</strong></p>
+        </div>
+    </footer>
+</body>
+</html>'''
+
 
 class handler(BaseHTTPRequestHandler):
     
     def do_GET(self):
         path = urlparse(self.path).path
         
-        # Serve HTML for root
         if path == "/" or path == "":
-            self._send_html(HTML_CONTENT)
+            self._send_html(HTML_MAIN)
+        elif path == "/pricing":
+            self._send_html(HTML_PRICING)
         elif path == "/api/health":
-            self._send_json({"status": "healthy", "service": "Sentient110", "version": "2.0.0", "real_api": bool(os.getenv("OPENAI_API_KEY"))})
+            self._send_json({
+                "status": "healthy", 
+                "service": "Sentient110", 
+                "version": "2.1.0", 
+                "real_api": bool(os.getenv("OPENAI_API_KEY")),
+                "cache_size": len(ANALYSIS_CACHE),
+                "users_count": len(USERS_DB)
+            })
         elif path == "/api/trending":
             self._send_json({"trending": [
                 {"ticker": "TSLA", "signal": "BUY", "confidence": 89, "price": 248.32},
@@ -307,22 +574,88 @@ class handler(BaseHTTPRequestHandler):
         elif path.startswith("/api/verify/"):
             self._send_json({"verified": False})
         else:
-            self._send_json({"error": "Not found"}, 404)
+            self._send_html(HTML_MAIN)  # Default to main page
     
     def do_POST(self):
         path = urlparse(self.path).path
+        content_length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(content_length).decode('utf-8') if content_length > 0 else '{}'
+        
+        try:
+            data = json.loads(body)
+        except:
+            data = {}
         
         if path == "/api/analyze":
-            content_length = int(self.headers.get('Content-Length', 0))
-            body = self.rfile.read(content_length).decode('utf-8')
-            try:
-                data = json.loads(body) if body else {}
-                ticker = data.get("ticker", "TSLA").upper().strip()
-            except:
-                ticker = "TSLA"
+            ticker = data.get("ticker", "TSLA").upper().strip()
             
+            # Check cache first!
+            cached = get_cached(ticker)
+            if cached:
+                cached["cached"] = True
+                self._send_json(cached)
+                return
+            
+            # If not cached, analyze
             result = self._analyze(ticker)
+            result["cached"] = False
+            
+            # Store in cache
+            set_cache(ticker, result)
+            
             self._send_json(result)
+        
+        elif path == "/api/auth/signup":
+            email = data.get("email", "").lower().strip()
+            password = data.get("password", "")
+            name = data.get("name", "")
+            
+            if not email or not password:
+                self._send_json({"success": False, "error": "Email and password required"})
+                return
+            
+            if email in USERS_DB:
+                self._send_json({"success": False, "error": "Email already registered"})
+                return
+            
+            # Create user
+            USERS_DB[email] = {
+                "password_hash": hash_password(password),
+                "name": name or email.split("@")[0],
+                "plan": "free",
+                "created": datetime.now().isoformat()
+            }
+            
+            token = generate_token(email)
+            SESSIONS[token] = {"email": email, "expires": time.time() + 86400}
+            
+            self._send_json({
+                "success": True,
+                "token": token,
+                "user": {"email": email, "name": USERS_DB[email]["name"], "plan": "free"}
+            })
+        
+        elif path == "/api/auth/login":
+            email = data.get("email", "").lower().strip()
+            password = data.get("password", "")
+            
+            if email not in USERS_DB:
+                self._send_json({"success": False, "error": "User not found"})
+                return
+            
+            if USERS_DB[email]["password_hash"] != hash_password(password):
+                self._send_json({"success": False, "error": "Invalid password"})
+                return
+            
+            token = generate_token(email)
+            SESSIONS[token] = {"email": email, "expires": time.time() + 86400}
+            
+            user = USERS_DB[email]
+            self._send_json({
+                "success": True,
+                "token": token,
+                "user": {"email": email, "name": user["name"], "plan": user["plan"]}
+            })
         
         elif path == "/api/verify":
             query = parse_qs(urlparse(self.path).query)
@@ -333,7 +666,12 @@ class handler(BaseHTTPRequestHandler):
             timestamp = datetime.now().isoformat()
             tx_hash = "0x" + hashlib.sha256(f"{ticker}|{signal}|{confidence}|{timestamp}".encode()).hexdigest()
             
-            self._send_json({"tx_hash": tx_hash, "timestamp": timestamp, "network": "Story Protocol (Sepolia)", "verification_url": f"https://sepolia.etherscan.io/tx/{tx_hash}"})
+            self._send_json({
+                "tx_hash": tx_hash, 
+                "timestamp": timestamp, 
+                "network": "Story Protocol (Sepolia)", 
+                "verification_url": f"https://sepolia.etherscan.io/tx/{tx_hash}"
+            })
         else:
             self._send_json({"error": "Not found"}, 404)
     
@@ -345,7 +683,7 @@ class handler(BaseHTTPRequestHandler):
     def _cors(self):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
     
     def _send_json(self, data, status=200):
         self.send_response(status)
